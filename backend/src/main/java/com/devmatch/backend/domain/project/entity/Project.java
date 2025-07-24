@@ -1,15 +1,7 @@
 package com.devmatch.backend.domain.project.entity;
 
 import com.devmatch.backend.domain.user.entity.User;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,14 +31,15 @@ public class Project {
   private ProjectStatus status;
 
   private String content;
-
+  private Integer durationWeeks;
   private LocalDateTime createdAt;
 
   public Project(
       String title,
       String description,
       String techStack,
-      Integer teamSize
+      Integer teamSize,
+      Integer durationWeeks
   ) {
     this.title = title;
     this.description = description;
@@ -56,6 +49,7 @@ public class Project {
     this.status = ProjectStatus.RECRUITING;
     this.currentTeamSize = 0;
     this.content = "";
+    this.durationWeeks = durationWeeks;
     this.createdAt = LocalDateTime.now();
   }
 

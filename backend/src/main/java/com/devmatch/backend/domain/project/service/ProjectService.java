@@ -30,7 +30,8 @@ public class ProjectService {
         projectCreateRequest.title(),
         projectCreateRequest.description(),
         projectCreateRequest.techStack(),
-        projectCreateRequest.teamSize()
+        projectCreateRequest.teamSize(),
+        projectCreateRequest.durationWeeks()
     );
 
     creator.addProject(project);

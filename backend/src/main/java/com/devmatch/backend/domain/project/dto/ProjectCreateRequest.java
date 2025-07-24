@@ -8,7 +8,8 @@ public record ProjectCreateRequest(
     @Size(min = 1, max = 200) String title,
     @Size(min = 1, max = 2000) String description,
     @Size(min = 1, max = 500) String techStack,
-    @Min(1) int teamSize
+    @Min(1) int teamSize,
+    @Min(1) int durationWeeks
 ) {
 
 }
