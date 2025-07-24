@@ -6,15 +6,18 @@ import com.devmatch.backend.domain.project.entity.Project;
 import com.devmatch.backend.domain.project.service.ProjectService;
 import com.devmatch.backend.domain.user.entity.User;
 import com.devmatch.backend.domain.user.service.UserService;
+import com.devmatch.backend.global.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -28,9 +31,11 @@ public class UserController {
   private final ApplicationService applicationService;
 
   @PostMapping("/register")
-  public ResponseEntity<String> register(@Valid @RequestBody String name) {
+  @ResponseStatus(HttpStatus.CREATED)
+  public ResponseEntity<ApiResponse<User>> register(@Valid @RequestBody String name) {
     User user = userService.save(name);
-    return ResponseEntity.ok("사용자 등록 성공: " + user.getName() + " (ID: " + user.getId() + ")");
+
+    return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("사용자 등록 성공", user));
   }
 
   @GetMapping("/{id}/projects")
