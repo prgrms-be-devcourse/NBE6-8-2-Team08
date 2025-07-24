@@ -47,13 +47,13 @@ public class User {
   private List<Application> applications = new ArrayList<>();
 
   //연관관계를 지키기 위해서 꼭 user 객체 생성 후 호출. 그리고 db에 저장할 떄는 각 repository를 통해서 저장해야 함.
-  public void addProject(Project project) {
-    projects.add(project);
-    project.setUser(this); // 양방향 연관관계 설정
-  }
-
-  public void addApplication(Application application) {
-    applications.add(application);
-    application.setUser(this); // 양방향 연관관계 설정
-  }
+//  public void addProject(Project project) {
+//    projects.add(project);
+//    project.setUser(this); // 양방향 연관관계 설정
+//  }
+//
+//  public void addApplication(Application application) {
+//    applications.add(application);
+//    application.setUser(this); // 양방향 연관관계 설정
+//  }
 }
