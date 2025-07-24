@@ -2,7 +2,7 @@ package com.devmatch.backend.domain.user.service;
 
 import com.devmatch.backend.domain.user.entity.User;
 import com.devmatch.backend.domain.user.repository.UserRepository;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,8 @@ public class UserService {
   }
 
   @Transactional(readOnly = true)
-  public Optional<User> findById(long id) {
-    return userRepository.findById(id);
+  public User getUser(long id) {
+    return userRepository.findById(id).orElseThrow(() ->
+        new NoSuchElementException("해당 ID 사용자가 없습니다. ID: " + id));
   }
 }
