@@ -25,6 +25,6 @@ public class ProjectController {
       @Valid @RequestBody ProjectCreateRequest projectCreateRequest
   ) {
     return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(
-        "Project creation Successful.", projectService.createProject(projectCreateRequest)));
+        "프로젝트 생성 성공", projectService.createProject(projectCreateRequest)));
   }
 }

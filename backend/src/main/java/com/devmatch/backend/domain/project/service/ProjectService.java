@@ -21,7 +21,7 @@ public class ProjectService {
   public ProjectDetailResponse createProject(ProjectCreateRequest projectCreateRequest) {
     if (!projectCreateRequest.techStack().matches("^([\\w.+#-]+)(, [\\w.+#-]+)*$")) {
       throw new IllegalArgumentException(
-          "Tech stack format is invalid. It must be separated by comma and space.");
+          "기술 스택 기재 형식이 올바르지 않습니다. \", \"로 구분해주세요. ");
     }
 
     User creator = userService.getUser(projectCreateRequest.userId());
