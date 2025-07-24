@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class AnalysisService {
 
   private final AnalysisRepository analysisRepository;
@@ -26,7 +25,7 @@ public class AnalysisService {
 
   private final ChatModel chatModel;
 
-
+  @Transactional
   public AnalysisResult getOrAnalyzeCompatibility(Long applicationId) {
     return analysisRepository.findByApplicationId(applicationId)
         .orElseGet(() -> {
@@ -70,6 +69,7 @@ public class AnalysisService {
         });
   }
 
+  @Transactional(readOnly = true)
   public String assignTeamRoles(Long projectId) {
 
     Project project = projectRepository.findById(projectId).orElseThrow(
