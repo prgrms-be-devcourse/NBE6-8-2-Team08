@@ -1,7 +1,5 @@
 package com.devmatch.backend.domain.user.entity;
 
-import static jakarta.persistence.CascadeType.PERSIST;
-import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 import com.devmatch.backend.domain.application.entity.Application;
@@ -38,7 +36,6 @@ public class User {
 
   //Project 연관관계 설정
   //cascade REMOVE는 탈퇴기능이 없으니 사용하지 않음
-  //따로 repo 접근 안해도 여기서 접근.
   @OneToMany(mappedBy = "user", fetch = LAZY, cascade = {PERSIST}, orphanRemoval = true)
   private List<Project> projects = new ArrayList<>();
 
