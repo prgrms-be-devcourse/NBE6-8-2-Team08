@@ -1,13 +1,16 @@
 package com.devmatch.backend.security;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Configuration;
 
+
+//rest api 통신에 인증인가를
+@Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-  @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) {
-
-  }
+//  @Bean
+//  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//
+//  }
 }
