@@ -35,5 +35,4 @@ public class AnalysisResult {
 
   @Column(columnDefinition = "TEXT", nullable = false)
   private String compatibilityReason;
-
 }
