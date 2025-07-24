@@ -36,7 +36,6 @@ public class User {
     this.name = name;
   }
 
-
   //Project 연관관계 설정
   //cascade REMOVE는 탈퇴기능이 없으니 사용하지 않음
   //따로 repo 접근 안해도 여기서 접근.
@@ -46,14 +45,14 @@ public class User {
   @OneToMany(mappedBy = "user", fetch = LAZY, cascade = {PERSIST}, orphanRemoval = true)
   private List<Application> applications = new ArrayList<>();
 
-  //연관관계를 지키기 위해서 꼭 user 객체 생성 후 호출. 그리고 db에 저장할 떄는 각 repository를 통해서 저장해야 함.
-//  public void addProject(Project project) {
-//    projects.add(project);
-//    project.setUser(this); // 양방향 연관관계 설정
-//  }
-//
-//  public void addApplication(Application application) {
-//    applications.add(application);
-//    application.setUser(this); // 양방향 연관관계 설정
-//  }
+  //연관관계를 지키기 위해서 꼭 user 객체 생성 후 호출
+  public void addProject(Project project) {
+    projects.add(project);
+    project.setUser(this); // 양방향 연관관계 설정
+  }
+
+  public void addApplication(Application application) {
+    applications.add(application);
+    application.setUser(this); // 양방향 연관관계 설정
+  }
 }
