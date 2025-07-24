@@ -29,7 +29,7 @@ public class ApplicationController {
       @PathVariable Long applicationId
   ) {
     ApplicationDetailResponseDto applicationDetailResponseDto = new ApplicationDetailResponseDto(
-        applicationService.findById(applicationId)
+        applicationService.getApplicationDetail(applicationId)
     );
 
     // 성공 응답
