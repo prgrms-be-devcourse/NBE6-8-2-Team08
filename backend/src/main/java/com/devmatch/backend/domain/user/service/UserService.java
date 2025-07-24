@@ -1,5 +1,6 @@
 package com.devmatch.backend.domain.user.service;
 
+import com.devmatch.backend.domain.user.dto.UserRegisterDto;
 import com.devmatch.backend.domain.user.entity.User;
 import com.devmatch.backend.domain.user.repository.UserRepository;
 import java.util.NoSuchElementException;
@@ -14,9 +15,9 @@ public class UserService {
 
   private final UserRepository userRepository;
 
-  public User save(String name) {
-    User user = new User(name);
-    return userRepository.save(user);
+  public UserRegisterDto save(String name) {
+    User user = userRepository.save(new User(name));
+    return new UserRegisterDto(user);
   }
 
   @Transactional(readOnly = true)
