@@ -7,6 +7,7 @@ import com.devmatch.backend.domain.project.mapper.ProjectMapper;
 import com.devmatch.backend.domain.project.repository.ProjectRepository;
 import com.devmatch.backend.domain.user.entity.User;
 import com.devmatch.backend.domain.user.service.UserService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -37,5 +38,19 @@ public class ProjectService {
     creator.addProject(project);
 
     return ProjectMapper.toProjectDetailResponse(projectRepository.save(project));
+  }
+
+  public List<ProjectDetailResponse> getProjects() {
+    return projectRepository.findAll()
+        .stream()
+        .map(ProjectMapper::toProjectDetailResponse)
+        .toList();
+  }
+
+  public List<ProjectDetailResponse> getProjectsByUserId(long userId) {
+    return projectRepository.findAllByCreatorId(userId)
+        .stream()
+        .map(ProjectMapper::toProjectDetailResponse)
+        .toList();
   }
 }
