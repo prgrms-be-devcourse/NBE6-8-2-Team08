@@ -10,6 +10,7 @@ import com.devmatch.backend.domain.user.service.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -19,6 +20,7 @@ public class ProjectService {
 
   private final ProjectRepository projectRepository;
 
+  @Transactional
   public ProjectDetailResponse createProject(ProjectCreateRequest projectCreateRequest) {
     if (!projectCreateRequest.techStack().matches("^([\\w.+#-]+)(, [\\w.+#-]+)*$")) {
       throw new IllegalArgumentException(
@@ -40,6 +42,7 @@ public class ProjectService {
     return ProjectMapper.toProjectDetailResponse(projectRepository.save(project));
   }
 
+  @Transactional(readOnly = true)
   public List<ProjectDetailResponse> getProjects() {
     return projectRepository.findAll()
         .stream()
@@ -47,6 +50,7 @@ public class ProjectService {
         .toList();
   }
 
+  @Transactional(readOnly = true)
   public List<ProjectDetailResponse> getProjectsByUserId(long userId) {
     return projectRepository.findAllByCreatorId(userId)
         .stream()
