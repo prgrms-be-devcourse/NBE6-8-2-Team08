@@ -8,6 +8,7 @@ import com.devmatch.backend.domain.project.repository.ProjectRepository;
 import com.devmatch.backend.domain.user.entity.User;
 import com.devmatch.backend.domain.user.service.UserService;
 import java.util.List;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,5 +57,11 @@ public class ProjectService {
         .stream()
         .map(ProjectMapper::toProjectDetailResponse)
         .toList();
+  }
+
+  @Transactional(readOnly = true)
+  public ProjectDetailResponse getProject(Long projectId) {
+    return ProjectMapper.toProjectDetailResponse(projectRepository.findById(projectId)
+        .orElseThrow(() -> new NoSuchElementException("조회하려는 프로젝트가 없습니다.")));
   }
 }
