@@ -1,6 +1,7 @@
 package com.devmatch.backend.domain.project.entity;
 
 import com.devmatch.backend.domain.user.entity.User;
+import com.devmatch.backend.exception.SameStatusException;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -58,5 +59,13 @@ public class Project {
 
   public void setUser(User user) {
     this.creator = user;
+  }
+
+  public void changeStatus(ProjectStatus newStatus) {
+    if (newStatus == this.status) {
+      throw new SameStatusException("이전 상태값과 다른 값이어야 합니다");
+    }
+
+    this.status = newStatus;
   }
 }

@@ -3,10 +3,12 @@ package com.devmatch.backend.domain.project.service;
 import com.devmatch.backend.domain.project.dto.ProjectCreateRequest;
 import com.devmatch.backend.domain.project.dto.ProjectDetailResponse;
 import com.devmatch.backend.domain.project.entity.Project;
+import com.devmatch.backend.domain.project.entity.ProjectStatus;
 import com.devmatch.backend.domain.project.mapper.ProjectMapper;
 import com.devmatch.backend.domain.project.repository.ProjectRepository;
 import com.devmatch.backend.domain.user.entity.User;
 import com.devmatch.backend.domain.user.service.UserService;
+import com.devmatch.backend.exception.SameStatusException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -60,8 +62,26 @@ public class ProjectService {
   }
 
   @Transactional(readOnly = true)
-  public ProjectDetailResponse getProject(Long projectId) {
-    return ProjectMapper.toProjectDetailResponse(projectRepository.findById(projectId)
-        .orElseThrow(() -> new NoSuchElementException("조회하려는 프로젝트가 없습니다")));
+  public ProjectDetailResponse getProjectDetail(Long projectId) {
+    return ProjectMapper.toProjectDetailResponse(getProject(projectId));
+  }
+
+  @Transactional
+  public ProjectDetailResponse modifyStatus(Long projectId, String status) {
+    try {
+      Project project = getProject(projectId);
+      project.changeStatus(ProjectStatus.valueOf(status));
+
+      return ProjectMapper.toProjectDetailResponse(project);
+    } catch (SameStatusException e) {
+      throw e;
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException("유효하지 않은 상태값입니다");
+    }
+  }
+
+  private Project getProject(Long projectId) {
+    return projectRepository.findById(projectId)
+        .orElseThrow(() -> new NoSuchElementException("조회하려는 프로젝트가 없습니다"));
   }
 }
