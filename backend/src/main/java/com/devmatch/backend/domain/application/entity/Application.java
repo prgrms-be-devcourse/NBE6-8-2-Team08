@@ -53,7 +53,7 @@ public class Application {
   // 지원서의 승인 상태
   @Column(name = "application_status", nullable = false)
   @Enumerated(EnumType.STRING)
-  private ApplicationStatus status;
+  private ApplicationStatus status = ApplicationStatus.PENDING;
 
   // 지원 일시
   @CreatedDate
