@@ -3,17 +3,16 @@ spring:
     name: backend
   profiles:
     active: dev
+    include: secret
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
     properties:
       hibernate:
-        format_sql: true
-        highlight_sql: true
-        use_sql_comments: true
-  profiles:
-    include: secret
+      format_sql: true
+      highlight_sql: true
+      use_sql_comments: true
   ai:
     openai:
       base-url: https://api.groq.com/openai
