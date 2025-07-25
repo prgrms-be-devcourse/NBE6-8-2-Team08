@@ -2,7 +2,7 @@ package com.devmatch.backend.domain.user.controller;
 
 import com.devmatch.backend.domain.application.entity.Application;
 import com.devmatch.backend.domain.application.service.ApplicationService;
-import com.devmatch.backend.domain.project.entity.Project;
+import com.devmatch.backend.domain.project.dto.ProjectDetailResponse;
 import com.devmatch.backend.domain.project.service.ProjectService;
 import com.devmatch.backend.domain.user.dto.UserRegisterDto;
 import com.devmatch.backend.domain.user.service.UserService;
@@ -12,12 +12,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
@@ -36,12 +31,12 @@ public class UserController {
   }
 
   @GetMapping("/{id}/projects")
-  public List<Project> findProjectsById(@PathVariable long id) {
-    return projectService.getProjects(id);
+  public List<ProjectDetailResponse> findProjectsById(@PathVariable long id) {
+    return projectService.getProjectsByUserId(id);
   }
 
   @GetMapping("/{id}/applications")
   public List<Application> findApplicationsById(@PathVariable long id) {
-    return applicationService.getApplications(id);
+    return applicationService.getApplicationsByUserId(id);
   }
 }
