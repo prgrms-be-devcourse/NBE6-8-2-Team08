@@ -32,14 +32,14 @@ public class ApplicationService {
     applicationRepository.delete(application); // DB 에서 삭제
   }
 
+  // 사용자 ID로 사용자가 작성한 모든 지원서들을 가져오는 함수
+  public List<Application> getApplicationsByUserId(Long id) {
+    return applicationRepository.findAllByUserId(id);
+  }
+
   // 지원서 ID로 지원서를 가져오는 함수
   private Application getApplicationByApplicationId(Long id) {
     return applicationRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("지원서를 찾을 수 없습니다. ID: " + id));
-  }
-
-  // 사용자 ID로 사용자가 작성한 모든 지원서들을 가져오는 함수
-  private List<Application> getApplicationsByUserId(Long id) {
-    return applicationRepository.findAllByUserId(id);
   }
 }
