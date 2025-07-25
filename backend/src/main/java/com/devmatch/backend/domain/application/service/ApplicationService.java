@@ -1,5 +1,7 @@
 package com.devmatch.backend.domain.application.service;
 
+import com.devmatch.backend.domain.application.dto.response.ApplicationDeleteResponseDto;
+import com.devmatch.backend.domain.application.dto.response.ApplicationDetailResponseDto;
 import com.devmatch.backend.domain.application.entity.Application;
 import com.devmatch.backend.domain.application.repository.ApplicationRepository;
 import java.util.NoSuchElementException;
@@ -13,8 +15,23 @@ public class ApplicationService {
 
   private final ApplicationRepository applicationRepository;
 
+  // 지원서 상세 조회 로직
   @Transactional(readOnly = true)
-  public Application getApplicationDetail(Long id) {
+  public ApplicationDetailResponseDto getApplicationDetail(Long id) {
+    return new ApplicationDetailResponseDto(getApplication(id));
+  }
+
+  // 지원서 삭제 로직
+  @Transactional
+  public ApplicationDeleteResponseDto deleteApplication(Long id) {
+    Application application = getApplication(id);
+    applicationRepository.delete(application);
+
+    return new ApplicationDeleteResponseDto(application);
+  }
+
+  // 지원서를 가져오는 함수
+  private Application getApplication(Long id) {
     return applicationRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("지원서를 찾을 수 없습니다. ID: " + id));
   }
