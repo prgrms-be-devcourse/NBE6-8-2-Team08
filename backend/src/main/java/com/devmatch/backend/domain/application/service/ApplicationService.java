@@ -3,7 +3,7 @@ package com.devmatch.backend.domain.application.service;
 import com.devmatch.backend.domain.application.dto.response.ApplicationDetailResponseDto;
 import com.devmatch.backend.domain.application.entity.Application;
 import com.devmatch.backend.domain.application.repository.ApplicationRepository;
-import com.devmatch.backend.domain.user.repository.UserRepository;
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApplicationService {
 
   private final ApplicationRepository applicationRepository;
-  private final UserRepository userRepository;
 
   // 지원서 상세 조회 로직
   @Transactional(readOnly = true)
@@ -39,9 +38,8 @@ public class ApplicationService {
         .orElseThrow(() -> new NoSuchElementException("지원서를 찾을 수 없습니다. ID: " + id));
   }
 
-  // 사용자 ID로 지원서를 가져오는 함수
-  private Application getApplicationByUserId(Long id) {
-    return applicationRepository.findApplicationByUserId(id)
-        .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다. ID: " + id));
+  // 사용자 ID로 사용자가 작성한 모든 지원서들을 가져오는 함수
+  private List<Application> getApplicationsByUserId(Long id) {
+    return applicationRepository.findAllByUserId(id);
   }
 }
