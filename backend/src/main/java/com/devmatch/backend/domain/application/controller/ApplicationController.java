@@ -6,6 +6,7 @@ import com.devmatch.backend.global.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,13 +29,40 @@ public class ApplicationController {
   public ResponseEntity<ApiResponse<ApplicationDetailResponseDto>> getApplicationDetail(
       @PathVariable Long applicationId
   ) {
-    ApplicationDetailResponseDto applicationDetailResponseDto = new ApplicationDetailResponseDto(
-        applicationService.getApplicationDetail(applicationId)
-    );
+    ApplicationDetailResponseDto applicationDetailResponseDto =
+        applicationService.getApplicationDetail(applicationId);
 
     // 성공 응답
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(new ApiResponse<>("조회 성공", applicationDetailResponseDto));
+        .body(
+            new ApiResponse<>(
+                "%s 번 지원서의 상세 정보 조회를 성공했습니다."
+                    .formatted(applicationDetailResponseDto),
+                applicationDetailResponseDto
+            )
+        );
+  }
+
+  /**
+   * 지원서 삭제 API
+   *
+   * @param applicationId 지원서 ID
+   * @return 삭제한 지원서
+   */
+  @DeleteMapping("/{id}")
+  public ResponseEntity<ApiResponse<String>> deleteApplication(
+      @PathVariable Long applicationId
+  ) {
+    applicationService.deleteApplication(applicationId);
+
+    // 성공 응답
+    return ResponseEntity
+        .status(HttpStatus.NO_CONTENT)
+        .body(
+            new ApiResponse<>(
+                "지원서의 삭제를 성공했습니다."
+            )
+        );
   }
 }

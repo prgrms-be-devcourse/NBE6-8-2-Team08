@@ -2,6 +2,7 @@ package com.devmatch.backend.domain.application.entity;
 
 import com.devmatch.backend.domain.analysis.entity.AnalysisResult;
 import com.devmatch.backend.domain.application.enums.ApplicationStatus;
+import com.devmatch.backend.domain.project.entity.Project;
 import com.devmatch.backend.domain.user.entity.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -18,7 +19,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;
@@ -46,9 +46,9 @@ public class Application {
   private User user;
 
   // 지원한 프로젝트의 고유 식별자
-//  @ManyToOne(fetch = FetchType.LAZY)
-//  @JoinColumn(name = "project_id")
-//  private Project project;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "project_id")
+  private Project project;
 
   // 지원서의 승인 상태
   @Column(name = "application_status", nullable = false)
@@ -69,7 +69,14 @@ public class Application {
   private AnalysisResult analysisResult;
 
   @Builder
-  public Application(BigDecimal fitness, ApplicationStatus status) {
+  public Application(ApplicationStatus status) {
     this.status = status;
+  }
+
+  public void setUser(User user) {
+    this.user = user;
+    if (!user.getApplications().contains(this)) {
+      user.addApplication(this); // 양방향 연관관계 설정
+    }
   }
 }
