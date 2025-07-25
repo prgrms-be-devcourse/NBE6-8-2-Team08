@@ -1,6 +1,5 @@
 package com.devmatch.backend.domain.application.controller;
 
-import com.devmatch.backend.domain.application.dto.response.ApplicationDeleteResponseDto;
 import com.devmatch.backend.domain.application.dto.response.ApplicationDetailResponseDto;
 import com.devmatch.backend.domain.application.service.ApplicationService;
 import com.devmatch.backend.global.ApiResponse;
@@ -55,16 +54,14 @@ public class ApplicationController {
   public ResponseEntity<ApiResponse<String>> deleteApplication(
       @PathVariable Long applicationId
   ) {
-    ApplicationDeleteResponseDto applicationDeleteResponseDto =
-        applicationService.deleteApplication(applicationId);
+    applicationService.deleteApplication(applicationId);
 
     // 성공 응답
     return ResponseEntity
-        .status(HttpStatus.OK)
+        .status(HttpStatus.NO_CONTENT)
         .body(
             new ApiResponse<>(
-                "%s 번 지원서의 삭제를 성공했습니다."
-                    .formatted(applicationDeleteResponseDto.id())
+                "지원서의 삭제를 성공했습니다."
             )
         );
   }
