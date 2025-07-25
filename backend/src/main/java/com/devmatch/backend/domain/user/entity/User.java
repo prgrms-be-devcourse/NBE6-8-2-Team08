@@ -52,4 +52,14 @@ public class User {
     applications.add(application);
     application.setUser(this); // 양방향 연관관계 설정
   }
+
+  public void removeProject(Project project) {
+    projects.remove(project);
+    project.setUser(null); // 양방향 연관관계 해제
+  }
+
+  public void removeApplication(Application application) {
+    applications.remove(application);
+    application.setUser(null); // 양방향 연관관계 해제
+  }
 }
