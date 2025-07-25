@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/project")
+@RequestMapping("/projects")
 public class ProjectController {
 
   private final ProjectService projectService;
@@ -31,5 +31,11 @@ public class ProjectController {
   public ResponseEntity<ApiResponse<List<ProjectDetailResponse>>> getAll() {
     return ResponseEntity.ok()
         .body(new ApiResponse<>("프로젝트 전체 조회 성공", projectService.getProjects()));
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<ApiResponse<ProjectDetailResponse>> get(@PathVariable Long id) {
+    return ResponseEntity.ok()
+        .body(new ApiResponse<>("프로젝트 단일 조회 성공", projectService.getProject(id)));
   }
 }
