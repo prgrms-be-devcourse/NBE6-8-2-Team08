@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-//세션 기반  + CSRF 토큰 기반 인증
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
