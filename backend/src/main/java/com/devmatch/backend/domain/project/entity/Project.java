@@ -16,7 +16,7 @@ public class Project {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String title;
+  private String  ;
   private String description;
   private String techStack;
 
