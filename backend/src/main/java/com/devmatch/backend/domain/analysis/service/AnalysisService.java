@@ -25,52 +25,57 @@ public class AnalysisService {
 
   private final ChatModel chatModel;
 
-  @Transactional
-  public AnalysisResult getOrAnalyzeCompatibility(Long applicationId) {
+  @Transactional(readOnly = true)
+  public AnalysisResult getAnalysisResult(Long applicationId) {
     return analysisRepository.findByApplicationId(applicationId)
-        .orElseGet(() -> {
-          Application application = applicationRepository.findById(applicationId)
-              .orElseThrow(() -> new NoSuchElementException(
-                  "지원서 " + applicationId + "를 찾을 수 없습니다."
-              ));
+        .orElseThrow(() -> new NoSuchElementException(
+            "분석 결과를 찾을 수 없습니다. applicationId: " + applicationId
+        ));
+  }
 
-          Project project = application.getProject();
-          List<SkillScore> userSkills = application.getSkillScore();
+  @Transactional
+  public AnalysisResult createAnalysisResult(Long applicationId) {
+    Application application = applicationRepository.findById(applicationId)
+        .orElseThrow(() -> new NoSuchElementException(
+            "지원서 " + applicationId + "를 찾을 수 없습니다."
+        ));
 
-          StringBuilder prompt = new StringBuilder();
-          prompt.append("당신은 전문 분석가입니다. 다음 정보를 바탕으로 지원자의 적합도를 평가해주세요.\n\n");
-          prompt.append("프로젝트: ").append(project.getDescription()).append("\n");
-          prompt.append("팀 규모: ").append(project.getTeamSize()).append("명\n");
-          prompt.append("프로젝트 기간: ").append(project.getDurationWeeks()).append("주\n");
-          prompt.append("지원자 기술 역량:\n");
+    Project project = application.getProject();
+    List<SkillScore> userSkills = application.getSkillScore();
 
-          for (SkillScore skill : userSkills) {
-            prompt.append("- ").append(skill.getTechName())
-                .append(": ").append(skill.getScore()).append("/10점\n");
-          }
+    StringBuilder prompt = new StringBuilder();
+    prompt.append("당신은 전문 분석가입니다. 다음 정보를 바탕으로 지원자의 적합도를 평가해주세요.\n\n");
+    prompt.append("프로젝트: ").append(project.getDescription()).append("\n");
+    prompt.append("팀 규모: ").append(project.getTeamSize()).append("명\n");
+    prompt.append("프로젝트 기간: ").append(project.getDurationWeeks()).append("주\n");
+    prompt.append("지원자 기술 역량:\n");
 
-          prompt.append("이 지원자가 프로젝트에 적합한지 0-100 사이 소수점 둘째자리로 평가하고, ");
-          prompt.append("그 이유를 간단히 설명해주세요.\n");
-          prompt.append("형식: 점수|이유 (예: 75.50|React 우수하나 백엔드 부족)");
+    for (SkillScore skill : userSkills) {
+      prompt.append("- ").append(skill.getTechName())
+          .append(": ").append(skill.getScore()).append("/10점\n");
+    }
 
-          String aiResponse = chatModel.call(prompt.toString());
+    prompt.append("이 지원자가 프로젝트에 적합한지 0-100 사이 소수점 둘째자리로 평가하고, ");
+    prompt.append("그 이유를 간단히 설명해주세요.\n");
+    prompt.append("형식: 점수|이유 (예: 75.50|React 우수하나 백엔드 부족)");
 
-          String[] parts = aiResponse.split("\\|");
-          double score = Double.parseDouble(parts[0].trim());
-          String reason = parts[1].trim();
+    String aiResponse = chatModel.call(prompt.toString());
 
-          AnalysisResult result = AnalysisResult.builder()
-              .application(application)
-              .compatibilityScore(score)
-              .compatibilityReason(reason)
-              .build();
+    String[] parts = aiResponse.split("\\|");
+    double score = Double.parseDouble(parts[0].trim());
+    String reason = parts[1].trim();
 
-          return analysisRepository.save(result);
-        });
+    AnalysisResult result = AnalysisResult.builder()
+        .application(application)
+        .compatibilityScore(score)
+        .compatibilityReason(reason)
+        .build();
+
+    return analysisRepository.save(result);
   }
 
   @Transactional(readOnly = true)
-  public String assignTeamRoles(Long projectId) {
+  public String createTeamRoleAssignment(Long projectId) {
 
     Project project = projectRepository.findById(projectId).orElseThrow(
         () -> new NoSuchElementException("프로젝트를 찾을 수 없습니다. ID: " + projectId)
