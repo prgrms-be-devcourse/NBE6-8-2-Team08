@@ -51,7 +51,7 @@ import {
  * 
  * 📡 백엔드 API 연동:
  * - POST /projects - 프로젝트 생성 (✅ 구현완료)
- * - 요청: ProjectCreateRequest { userId, title, description, techStack, teamSize, durationWeeks }
+ * - 요청: ProjectCreateRequest { userId, title, description, techStacks, teamSize, durationWeeks }
  * - 응답: ResponseEntity<ApiResponse<ProjectDetailResponse>>
  * 
  * 🔗 사용하는 API 함수들:
@@ -61,7 +61,7 @@ import {
  * - 기술스택 동적 추가/제거 (태그 형태)
  * - 데이터 무결성 보장 (중복 방지, 빈값 방지)
  * - AuthContext 로그인 상태 연동
- * - ','로 구분된 기술스택 문자열 생성
+ * - 기술스택 배열을 직접 백엔드로 전송
  */
 export default function CreateProjectPage() {
   const router = useRouter();
@@ -84,7 +84,7 @@ export default function CreateProjectPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    techStacks: [] as string[], // 동적 추가/제거, 최종 ','로 변환
+    techStacks: [] as string[], // 동적 추가/제거, 배열 형태로 백엔드 전송
     teamSize: 1,                // 팀 크기 (최소 1명)
     durationWeeks: 4           // 프로젝트 기간 (기본 4주)
   });
@@ -99,7 +99,9 @@ export default function CreateProjectPage() {
    * 📝 기능:
    * - 빈 문자열 방지
    * - 중복 방지
-   * - ','가 포함된 기술스택명 방지 (파싱 오류 방지)
+   * - 백엔드 정규식과 일치하는 문자만 허용 (A-Za-z0-9_.+#-)
+   * - 길이 제한 (1-30자)
+   * - 전체 기술스택 개수 제한 (10개)
    * - 트림 처리
    */
   const addTechStack = () => {
@@ -111,12 +113,26 @@ export default function CreateProjectPage() {
       return;
     }
     
-    if (tech.includes(',')) {
-      alert('기술스택명에는 쉼표(,)를 사용할 수 없습니다.');
+    // 길이 검증
+    if (tech.length > 30) {
+      alert('기술스택명은 30자 이하로 입력해주세요.');
       return;
     }
     
-    if (formData.techStacks.includes(tech)) {
+    // 백엔드 정규식과 일치하는 문자만 허용 (A-Za-z0-9_.+#-)
+    if (!/^[\w.+#-]+$/.test(tech)) {
+      alert('기술스택명은 영문, 숫자, 언더스코어(_), 점(.), 플러스(+), 샵(#), 하이픈(-)만 사용할 수 있습니다.');
+      return;
+    }
+    
+    // 전체 기술스택 개수 제한
+    if (formData.techStacks.length >= 10) {
+      alert('기술스택은 최대 10개까지 추가할 수 있습니다.');
+      return;
+    }
+    
+    // 중복 방지 (대소문자 구분하지 않음)
+    if (formData.techStacks.some(existingTech => existingTech.toLowerCase() === tech.toLowerCase())) {
       alert('이미 추가된 기술스택입니다.');
       return;
     }
@@ -196,6 +212,24 @@ export default function CreateProjectPage() {
     // 기술스택 검증
     if (formData.techStacks.length === 0) {
       errors.push('최소 1개 이상의 기술스택을 선택해주세요.');
+    } else if (formData.techStacks.length > 10) {
+      errors.push('기술스택은 최대 10개까지만 선택할 수 있습니다.');
+    } else {
+      // 각 기술스택 개별 검증
+      for (const tech of formData.techStacks) {
+        if (!tech.trim()) {
+          errors.push('빈 기술스택이 포함되어 있습니다.');
+          break;
+        }
+        if (tech.length > 30) {
+          errors.push(`'${tech}' 기술스택명이 30자를 초과했습니다.`);
+          break;
+        }
+        if (!/^[\w.+#-]+$/.test(tech)) {
+          errors.push(`'${tech}' 기술스택명에 허용되지 않는 문자가 포함되어 있습니다.`);
+          break;
+        }
+      }
     }
     
     // 팀 크기 검증
@@ -251,7 +285,7 @@ export default function CreateProjectPage() {
         userId: user!.id,                                          // AuthContext에서 가져온 사용자 ID
         title: formData.title.trim(),                             // 프로젝트 제목
         description: formData.description.trim(),                 // 프로젝트 설명
-        techStack: formData.techStacks.join(','),                // 기술스택 배열을 ','로 구분된 문자열로 변환
+        techStacks: formData.techStacks,                          // 기술스택 배열을 직접 전송
         teamSize: formData.teamSize,                              // 팀 크기
         durationWeeks: formData.durationWeeks                     // 프로젝트 기간
       };
@@ -440,7 +474,7 @@ export default function CreateProjectPage() {
                       </Button>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Enter 키를 누르거나 추가 버튼을 클릭하여 기술스택을 추가하세요. (콤마는 사용할 수 없습니다)
+                      Enter 키를 누르거나 추가 버튼을 클릭하여 기술스택을 추가하세요. (영문, 숫자, _.+#- 문자만 허용, 최대 30자, 10개까지)
                     </p>
                   </div>
                   
@@ -666,7 +700,7 @@ export default function CreateProjectPage() {
                     userId: user?.id || 'USER_ID',
                     title: formData.title || 'TITLE',
                     description: formData.description || 'DESCRIPTION',
-                    techStack: formData.techStacks.join(',') || 'TECH_STACKS',
+                    techStacks: formData.techStacks.length > 0 ? formData.techStacks : ['TECH_STACKS'],
                     teamSize: formData.teamSize,
                     durationWeeks: formData.durationWeeks
                   }, null, 2)}

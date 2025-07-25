@@ -13,7 +13,7 @@ interface ProjectCreateRequest {
   userId: number;        // long userId (백엔드)
   title: string;         // @Size(min = 1, max = 200) String title
   description: string;   // @Size(min = 1, max = 2000) String description  
-  techStack: string;     // @Size(min = 1, max = 500) String techStack
+  techStacks: string[];  // List<String> techStacks (배열로 변경)
   teamSize: number;      // @Min(1) int teamSize
   durationWeeks: number; // @Min(1) int durationWeeks
 }
