@@ -37,3 +37,7 @@ out/
 .vscode/
 
 .idea/
+
+### custum ###
+application-secret.yml
+.claude/
