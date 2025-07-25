@@ -73,6 +73,10 @@ public class Application {
     this.status = status;
   }
 
+  public void changeStatus(ApplicationStatus status) {
+    this.status = status;
+  }
+
   public void setUser(User user) {
     this.user = user;
     if (!user.getApplications().contains(this)) {
