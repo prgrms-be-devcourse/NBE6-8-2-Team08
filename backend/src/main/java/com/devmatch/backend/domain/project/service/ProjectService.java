@@ -26,8 +26,7 @@ public class ProjectService {
   @Transactional
   public ProjectDetailResponse createProject(ProjectCreateRequest projectCreateRequest) {
     if (!projectCreateRequest.techStack().matches("^([\\w.+#-]+)(, [\\w.+#-]+)*$")) {
-      throw new IllegalArgumentException(
-          "기술 스택 기재 형식이 올바르지 않습니다. \", \"로 구분해주세요");
+      throw new IllegalArgumentException("기술 스택 기재 형식이 올바르지 않습니다. \", \"로 구분해주세요");
     }
 
     User creator = userService.getUser(projectCreateRequest.userId());
@@ -42,7 +41,7 @@ public class ProjectService {
 
     creator.addProject(project);
 
-    return ProjectMapper.toProjectDetailResponse(projectRepository.save(project));
+    return ProjectMapper.toProjectDetailResponse(project);
   }
 
   @Transactional(readOnly = true)
