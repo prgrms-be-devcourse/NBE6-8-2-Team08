@@ -1,5 +1,7 @@
 package com.devmatch.backend.domain.user.entity;
 
+import static jakarta.persistence.CascadeType.PERSIST;
+import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 import com.devmatch.backend.domain.application.entity.Application;
