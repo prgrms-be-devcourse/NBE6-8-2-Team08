@@ -86,6 +86,14 @@ public class ProjectService {
     }
   }
 
+  @Transactional
+  public ProjectDetailResponse modifyContent(Long id, String content) {
+    Project project = getProject(id);
+    project.changeContent(content);
+
+    return ProjectMapper.toProjectDetailResponse(project);
+  }
+
   private Project getProject(Long projectId) {
     return projectRepository.findById(projectId)
         .orElseThrow(() -> new NoSuchElementException("조회하려는 프로젝트가 없습니다"));
