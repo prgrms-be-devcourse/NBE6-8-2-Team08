@@ -69,4 +69,8 @@ public class Project {
 
     this.status = newStatus;
   }
+
+  public void changeContent(String content) {
+    this.content = content;
+  }
 }

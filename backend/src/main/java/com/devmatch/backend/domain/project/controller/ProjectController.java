@@ -3,25 +3,14 @@ package com.devmatch.backend.domain.project.controller;
 import static org.springframework.http.HttpStatus.CREATED;
 
 import com.devmatch.backend.domain.application.dto.response.ApplicationDetailResponseDto;
-import com.devmatch.backend.domain.project.dto.ProjectApplyRequest;
-import com.devmatch.backend.domain.project.dto.ProjectContentUpdateRequest;
-import com.devmatch.backend.domain.project.dto.ProjectCreateRequest;
-import com.devmatch.backend.domain.project.dto.ProjectDetailResponse;
-import com.devmatch.backend.domain.project.dto.ProjectStatusUpdateRequest;
+import com.devmatch.backend.domain.project.dto.*;
 import com.devmatch.backend.domain.project.service.ProjectService;
 import com.devmatch.backend.global.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -64,7 +53,8 @@ public class ProjectController {
       @PathVariable Long id,
       @Valid @RequestBody ProjectContentUpdateRequest projectContentUpdateRequest
   ) {
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.ok().body(new ApiResponse<>("역할 배분 내용 수정 성공",
+        projectService.modifyContent(id, projectContentUpdateRequest.content())));
   }
 
   @DeleteMapping("/{id}")
