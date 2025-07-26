@@ -13,7 +13,7 @@ interface ProjectCreateRequest {
   userId: number;        // long userId (백엔드)
   title: string;         // @Size(min = 1, max = 200) String title
   description: string;   // @Size(min = 1, max = 2000) String description  
-  techStacks: string[];  // List<String> techStacks (배열로 변경)
+  techStack: string;     // @Pattern String techStack (쉼표 구분 문자열)
   teamSize: number;      // @Min(1) int teamSize
   durationWeeks: number; // @Min(1) int durationWeeks
 }
@@ -23,7 +23,7 @@ interface ProjectDetailResponse {
   id: number;                // Long id
   title: string;             // String title
   description: string;       // String description
-  techStacks: string[];      // List<String> techStacks
+  techStacks: string[];      // List<String> techStacks (응답에서는 배열로 받음)
   teamSize: number;          // Integer teamSize
   currentTeamSize: number;   // Integer currentTeamSize
   creator: string;           // String creator
@@ -45,7 +45,7 @@ interface ProjectContentUpdateRequest {
 // 백엔드 ProjectApplyRequest.java 기반
 interface ProjectApplyRequest {
   userId: number;        // @Min(1) Long userId
-  techStacks: string[];  // List<String> techStacks
+  techStacks: string[];  // List<String> techStacks (지원서에서는 배열로 전송)
   techScores: number[];  // List<Integer> techScores
 }
 

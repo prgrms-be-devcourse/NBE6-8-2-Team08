@@ -51,7 +51,7 @@ import {
  * 
  * 📡 백엔드 API 연동:
  * - POST /projects - 프로젝트 생성 (✅ 구현완료)
- * - 요청: ProjectCreateRequest { userId, title, description, techStacks, teamSize, durationWeeks }
+ * - 요청: ProjectCreateRequest { userId, title, description, techStack, teamSize, durationWeeks }
  * - 응답: ResponseEntity<ApiResponse<ProjectDetailResponse>>
  * 
  * 🔗 사용하는 API 함수들:
@@ -61,7 +61,7 @@ import {
  * - 기술스택 동적 추가/제거 (태그 형태)
  * - 데이터 무결성 보장 (중복 방지, 빈값 방지)
  * - AuthContext 로그인 상태 연동
- * - 기술스택 배열을 직접 백엔드로 전송
+ * - 기술스택 배열을 쉼표 구분 문자열로 변환하여 백엔드 전송
  */
 export default function CreateProjectPage() {
   const router = useRouter();
@@ -84,7 +84,7 @@ export default function CreateProjectPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    techStacks: [] as string[], // 동적 추가/제거, 배열 형태로 백엔드 전송
+    techStacks: [] as string[], // 동적 추가/제거, 전송 시 쉼표 구분 문자열로 변환
     teamSize: 1,                // 팀 크기 (최소 1명)
     durationWeeks: 4           // 프로젝트 기간 (기본 4주)
   });
@@ -285,7 +285,7 @@ export default function CreateProjectPage() {
         userId: user!.id,                                          // AuthContext에서 가져온 사용자 ID
         title: formData.title.trim(),                             // 프로젝트 제목
         description: formData.description.trim(),                 // 프로젝트 설명
-        techStacks: formData.techStacks,                          // 기술스택 배열을 직접 전송
+        techStack: formData.techStacks.join(', '),               // 기술스택 배열을 쉼표 구분 문자열로 변환
         teamSize: formData.teamSize,                              // 팀 크기
         durationWeeks: formData.durationWeeks                     // 프로젝트 기간
       };
@@ -700,7 +700,7 @@ export default function CreateProjectPage() {
                     userId: user?.id || 'USER_ID',
                     title: formData.title || 'TITLE',
                     description: formData.description || 'DESCRIPTION',
-                    techStacks: formData.techStacks.length > 0 ? formData.techStacks : ['TECH_STACKS'],
+                    techStack: formData.techStacks.length > 0 ? formData.techStacks.join(', ') : 'TECH_STACK',
                     teamSize: formData.teamSize,
                     durationWeeks: formData.durationWeeks
                   }, null, 2)}
