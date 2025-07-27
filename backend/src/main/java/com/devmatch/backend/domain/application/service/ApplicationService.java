@@ -1,11 +1,17 @@
 package com.devmatch.backend.domain.application.service;
 
+import com.devmatch.backend.domain.application.dto.request.ApplicationCreateRequestDto;
 import com.devmatch.backend.domain.application.dto.request.ApplicationStatusUpdateRequestDto;
 import com.devmatch.backend.domain.application.dto.response.ApplicationDetailResponseDto;
 import com.devmatch.backend.domain.application.entity.Application;
 import com.devmatch.backend.domain.application.repository.ApplicationRepository;
+import com.devmatch.backend.domain.project.entity.Project;
+import com.devmatch.backend.domain.project.repository.ProjectRepository;
+import com.devmatch.backend.domain.user.entity.User;
+import com.devmatch.backend.domain.user.repository.UserRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +21,34 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApplicationService {
 
   private final ApplicationRepository applicationRepository;
+  private final UserRepository userRepository;
+  private final ProjectRepository projectRepository;
+
+  // 지원서 작성 로직
+  @Transactional
+  public ApplicationDetailResponseDto createApplication(ApplicationCreateRequestDto reqBody) {
+    User user = userRepository.findById(reqBody.userId())
+        .orElseThrow(() -> new NoSuchElementException("유저를 찾을 수 없습니다. ID: " + reqBody.userId()));
+
+    Project project = projectRepository.findById(reqBody.projectId())
+        .orElseThrow(() -> new NoSuchElementException("프로젝트를 찾을 수 없습니다. ID: " + reqBody.projectId()));
+
+    Application application = Application.builder()
+        .user(user)
+        .project(project)
+        .status(reqBody.status())
+        .build();
+
+    return new ApplicationDetailResponseDto(applicationRepository.save(application));
+  }
+
+  // 지원서 전체 조회 로직
+  @Transactional(readOnly = true)
+  public List<ApplicationDetailResponseDto> getApplications(Long userId) {
+    return getApplicationsByUserId(userId).stream()
+        .map(ApplicationDetailResponseDto::new)
+        .collect(Collectors.toList());
+  }
 
   // 지원서 상세 조회 로직
   @Transactional(readOnly = true)
