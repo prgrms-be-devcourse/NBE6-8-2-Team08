@@ -53,7 +53,8 @@ public class ProjectController {
       @PathVariable Long id,
       @Valid @RequestBody ProjectContentUpdateRequest projectContentUpdateRequest
   ) {
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.ok().body(new ApiResponse<>("역할 배분 내용 수정 성공",
+        projectService.modifyContent(id, projectContentUpdateRequest.content())));
   }
 
   @DeleteMapping("/{id}")
