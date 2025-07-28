@@ -77,6 +77,7 @@ public class ProjectController {
       @PathVariable Long id,
       @RequestBody ProjectApplyRequest projectApplyRequest
   ) {
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.ok().body(new ApiResponse<>("지원서 작성 성공",
+        applicationService.createApplication(id, projectApplyRequest)));
   }
 }
