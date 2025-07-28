@@ -5,12 +5,20 @@ import { motion } from 'framer-motion';
 import { 
   ArrowLeft, 
   Calendar, 
-  User,
-  Target,
-  Star,
-  Briefcase,
-  Clock,
-  ChevronRight
+  DollarSign, 
+  MapPin, 
+  Clock, 
+  Users, 
+  Star, 
+  Github, 
+  ExternalLink, 
+  MessageCircle,
+  Heart,
+  Share2,
+  Zap,
+  Code,
+  Database,
+  Smartphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
