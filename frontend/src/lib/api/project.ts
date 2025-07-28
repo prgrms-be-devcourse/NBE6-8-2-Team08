@@ -19,7 +19,7 @@ interface ProjectCreateRequest {
 }
 
 // 백엔드 ProjectDetailResponse.java 기반
-interface ProjectDetailResponse {
+export interface ProjectDetailResponse {
   id: number;                // Long id
   title: string;             // String title
   description: string;       // String description
@@ -128,7 +128,7 @@ export const deleteProject = async (id: number): Promise<void> => {
  * 백엔드: ProjectController.getApplications() - ResponseEntity.noContent().build() 반환중
  * 구현 필요: 프로젝트별 지원서 목록 조회 로직
  */
-export const getProjectApplications = async (id: number): Promise<any[]> => {
+export const getProjectApplications = async (id: number): Promise<never[]> => {
   throw new Error('🚧 백엔드 구현 대기중 - GET /projects/{id}/applications 엔드포인트 부분구현됨 (로직 없음)');
   // 구현 예정 코드:
   // const response = await axios.get(`${API_BASE_URL}/projects/${id}/applications`);
@@ -140,7 +140,7 @@ export const getProjectApplications = async (id: number): Promise<any[]> => {
  * 백엔드: ProjectController.apply() - ResponseEntity.noContent().build() 반환중
  * 구현 필요: 프로젝트 지원 로직
  */
-export const applyToProject = async (projectId: number, applicationData: ProjectApplyRequest): Promise<any> => {
+export const applyToProject = async (projectId: number, applicationData: ProjectApplyRequest): Promise<never> => {
   throw new Error('🚧 백엔드 구현 대기중 - POST /projects/{id}/applications 엔드포인트 부분구현됨 (로직 없음)');
   // 구현 예정 코드:
   // const response = await axios.post(`${API_BASE_URL}/projects/${projectId}/applications`, applicationData);
