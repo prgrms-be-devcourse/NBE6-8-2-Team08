@@ -9,6 +9,6 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
   List<Application> findAllByUserId(Long id);
 
-  List<Application> findByProjectAndStatus(Long projectId, ApplicationStatus status);
+  List<Application> findByProjectIdAndStatus(Long projectId, ApplicationStatus status);
 
 }

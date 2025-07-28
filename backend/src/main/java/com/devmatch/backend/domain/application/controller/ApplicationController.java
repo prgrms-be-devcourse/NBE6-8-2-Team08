@@ -26,15 +26,15 @@ public class ApplicationController {
   /**
    * 지원서 상세 조회 API
    *
-   * @param applicationId 지원서 ID
+   * @param id 지원서 ID
    * @return 지원서 상세 정보
    */
   @GetMapping("/{id}")
   public ResponseEntity<ApiResponse<ApplicationDetailResponseDto>> getApplicationDetail(
-      @PathVariable Long applicationId
+      @PathVariable Long id
   ) {
     ApplicationDetailResponseDto applicationDetailResponseDto =
-        applicationService.getApplicationDetail(applicationId);
+        applicationService.getApplicationDetail(id);
 
     // 성공 응답
     return ResponseEntity
@@ -51,14 +51,14 @@ public class ApplicationController {
   /**
    * 지원서 삭제 API
    *
-   * @param applicationId 지원서 ID
+   * @param id 지원서 ID
    * @return 지원서 삭제 성공 메시지
    */
   @DeleteMapping("/{id}")
   public ResponseEntity<ApiResponse<String>> deleteApplication(
-      @PathVariable Long applicationId
+      @PathVariable Long id
   ) {
-    applicationService.deleteApplication(applicationId);
+    applicationService.deleteApplication(id);
 
     // 성공 응답
     return ResponseEntity
@@ -73,16 +73,16 @@ public class ApplicationController {
   /**
    * 지원서 상태 업데이트 API
    *
-   * @param applicationId 지원서 ID
+   * @param id 지원서 ID
    * @param reqBody       상태 업데이트 요청 DTO
    * @return 상태 업데이트 성공 메시지
    */
   @PatchMapping("/{id}/status")
   public ResponseEntity<ApiResponse<String>> updateApplicationStatus(
-      @PathVariable Long applicationId,
+      @PathVariable Long id,
       @Valid @RequestBody ApplicationStatusUpdateRequestDto reqBody
   ) {
-    applicationService.updateApplicationStatus(applicationId, reqBody);
+    applicationService.updateApplicationStatus(id, reqBody);
 
     return ResponseEntity
         .status(HttpStatus.NO_CONTENT)
