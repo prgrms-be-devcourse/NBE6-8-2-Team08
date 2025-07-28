@@ -42,7 +42,7 @@ export interface LoginResponse {
 export interface AnalysisResult {
   id: number;
   applicationId: number;
-  compatibilityScore: number;
+  compatibilityScore: string;
   compatibilityReason: string;
 }
 
@@ -66,8 +66,8 @@ export interface ApplicationStatusUpdateRequest {
 
 // 지원서 생성 요청 타입 (application.ts에서 필요)
 export interface ApplicationCreateRequest {
+  userId: number;
   projectId: number;
-  // 기술 스택별 점수 등 추가 필드 정의 가능
 }
 
 // ============================================
@@ -78,7 +78,7 @@ export interface ApplicationCreateRequest {
 export type ApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 // 프로젝트 상태 (백엔드 ProjectStatus enum)  
-export type ProjectStatus = 'RECRUITING' | 'COMPLETED';
+export type ProjectStatus = 'RECRUITING' | 'IN_PROGRESS' | 'COMPLETED';
 
 // ============================================
 // 📝 참고사항
