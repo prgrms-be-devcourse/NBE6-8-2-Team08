@@ -69,8 +69,10 @@ public class Application {
   private AnalysisResult analysisResult;
 
   @Builder
-  public Application(ApplicationStatus status) {
-    this.status = status;
+  public Application(User user, Project project, ApplicationStatus status) {
+    this.user = user;
+    this.project = project;
+    this.status = status != null ? status : ApplicationStatus.PENDING;
   }
 
   public void changeStatus(ApplicationStatus status) {
