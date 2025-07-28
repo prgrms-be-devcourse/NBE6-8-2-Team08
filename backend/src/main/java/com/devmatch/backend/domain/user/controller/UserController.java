@@ -8,6 +8,7 @@ import com.devmatch.backend.domain.user.dto.UserRegisterDto;
 import com.devmatch.backend.domain.user.service.UserService;
 import com.devmatch.backend.global.ApiResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,13 +37,15 @@ public class UserController {
   }
 
   @GetMapping("/{id}/projects")
-  public ResponseEntity<List<ProjectDetailResponse>> findProjectsById(@PathVariable Long id) {
-    return ResponseEntity.status(HttpStatus.OK).body(projectService.getProjectsByUserId(id));
+  public ResponseEntity<List<ProjectDetailResponse>> getProjects(
+      @Size(min = 1) @PathVariable Long id) {
+    return ResponseEntity.ok().body(projectService.getProjectsByUserId(id));
   }
 
   @GetMapping("/{id}/applications")
-  public ResponseEntity<List<Application>> findApplicationsById(@PathVariable Long id) {
-    return ResponseEntity.status(HttpStatus.OK)
+  public ResponseEntity<List<Application>> getApplications(
+      @Size(min = 1) @PathVariable Long id) {
+    return ResponseEntity.ok()
         .body(applicationService.getApplicationsByUserId(id));
   }
 }
