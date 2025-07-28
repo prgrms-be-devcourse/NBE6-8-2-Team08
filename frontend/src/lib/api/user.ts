@@ -17,7 +17,7 @@ interface UserRegisterDto {
 }
 
 // 백엔드 ProjectDetailResponse.java 기반 (project.ts와 동일)
-interface ProjectDetailResponse {
+export interface ProjectDetailResponse {
   id: number;                // Long id
   title: string;             // String title
   description: string;       // String description
@@ -31,7 +31,7 @@ interface ProjectDetailResponse {
 }
 
 // 백엔드 Application 엔티티 기반 (types/index.ts의 ApplicationEntity와 동일)
-interface Application {
+export interface Application {
   id: number;        // Long id
   userId: number;    // Long userId (User 엔티티 FK)
   projectId: number; // Long projectId (Project 엔티티 FK)

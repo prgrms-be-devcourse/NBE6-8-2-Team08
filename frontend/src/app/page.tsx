@@ -37,17 +37,11 @@ import {
   Search, 
   Plus, 
   Filter, 
-  TrendingUp, 
   Users, 
   Clock, 
-  Star,
-  Target,
   Briefcase,
   Award,
   Activity,
-  Code,
-  GitBranch,
-  Calendar,
   LogIn,
   LogOut,
   UserPlus
@@ -253,7 +247,7 @@ export default function Home() {
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.techStacks.some(tech => tech.toLowerCase().includes(searchTerm.toLowerCase()));
+                         project.techStacks.some((tech: string) => tech.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesStatus = selectedStatus === 'ALL' || project.status === selectedStatus;
     
