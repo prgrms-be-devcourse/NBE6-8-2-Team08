@@ -69,20 +69,12 @@ public class Application {
   private AnalysisResult analysisResult;
 
   @Builder
-  public Application(User user, Project project, ApplicationStatus status) {
+  public Application(User user, Project project) {
     this.user = user;
     this.project = project;
-    this.status = status != null ? status : ApplicationStatus.PENDING;
   }
 
   public void changeStatus(ApplicationStatus status) {
     this.status = status;
-  }
-
-  public void setUser(User user) {
-    this.user = user;
-    if (!user.getApplications().contains(this)) {
-      user.addApplication(this); // 양방향 연관관계 설정
-    }
   }
 }

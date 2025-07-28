@@ -7,8 +7,9 @@ import com.devmatch.backend.domain.application.entity.Application;
 import com.devmatch.backend.domain.application.repository.ApplicationRepository;
 import com.devmatch.backend.domain.project.entity.Project;
 import com.devmatch.backend.domain.project.repository.ProjectRepository;
+import com.devmatch.backend.domain.project.service.ProjectService;
 import com.devmatch.backend.domain.user.entity.User;
-import com.devmatch.backend.domain.user.repository.UserRepository;
+import com.devmatch.backend.domain.user.service.UserService;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -21,22 +22,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApplicationService {
 
   private final ApplicationRepository applicationRepository;
-  private final UserRepository userRepository;
   private final ProjectRepository projectRepository;
+  private final UserService userService;
+  private final ProjectService projectService;
 
   // 지원서 작성 로직
   @Transactional
   public ApplicationDetailResponseDto createApplication(ApplicationCreateRequestDto reqBody) {
-    User user = userRepository.findById(reqBody.userId())
-        .orElseThrow(() -> new NoSuchElementException("유저를 찾을 수 없습니다. ID: " + reqBody.userId()));
-
-    Project project = projectRepository.findById(reqBody.projectId())
-        .orElseThrow(() -> new NoSuchElementException("프로젝트를 찾을 수 없습니다. ID: " + reqBody.projectId()));
+    User user = userService.getUser(reqBody.userId());
+    Project project = projectService.getProject(reqBody.projectId());
 
     Application application = Application.builder()
         .user(user)
         .project(project)
-        .status(reqBody.status())
         .build();
 
     return new ApplicationDetailResponseDto(applicationRepository.save(application));
@@ -61,12 +59,10 @@ public class ApplicationService {
   public void deleteApplication(Long id) {
     Application application = getApplicationByApplicationId(id);
 
-    // orphanRemoval = true 로 인해 컬렉션에서 제거하면 자동으로 DB 에서도 삭제됨.
-    application.getUser().removeApplication(application); // 컬렉션에서 제거
-
-//    applicationRepository.delete(application); // DB 에서 삭제
+    applicationRepository.delete(application); // DB 에서 삭제
   }
 
+  // 지원서 상태 업데이트 로직
   @Transactional
   public void updateApplicationStatus(Long id, ApplicationStatusUpdateRequestDto reqBody) {
     Application application = getApplicationByApplicationId(id);

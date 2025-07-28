@@ -100,7 +100,7 @@ public class ProjectService {
     projectRepository.deleteById(id);
   }
 
-  private Project getProject(Long projectId) {
+  public Project getProject(Long projectId) {
     return projectRepository.findById(projectId)
         .orElseThrow(() -> new NoSuchElementException("조회하려는 프로젝트가 없습니다"));
   }
