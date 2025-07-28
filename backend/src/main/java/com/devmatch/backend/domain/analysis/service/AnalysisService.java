@@ -8,6 +8,7 @@ import com.devmatch.backend.domain.application.enums.ApplicationStatus;
 import com.devmatch.backend.domain.application.repository.ApplicationRepository;
 import com.devmatch.backend.domain.project.entity.Project;
 import com.devmatch.backend.domain.project.repository.ProjectRepository;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -62,7 +63,7 @@ public class AnalysisService {
     String aiResponse = chatModel.call(prompt.toString());
 
     String[] parts = aiResponse.split("\\|");
-    double score = Double.parseDouble(parts[0].trim());
+    BigDecimal score = new BigDecimal(parts[0].trim());
     String reason = parts[1].trim();
 
     AnalysisResult result = AnalysisResult.builder()
