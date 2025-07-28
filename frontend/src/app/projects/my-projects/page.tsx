@@ -11,13 +11,13 @@ import Link from 'next/link';
 // 🔗 백엔드 API 연동 모듈 (우리가 만든 api/* 파일들)
 // ============================================
 import { 
-  getUserProjects, 
   updateProjectStatus, 
   updateProjectContent, 
   deleteProject, 
   getProjectApplications,
   ProjectDetailResponse 
 } from '@/lib/api/project';
+import { getUserProjects } from '@/lib/api/user';
 
 // ============================================
 // 🔐 인증 컨텍스트 (로그인 상태 관리)
@@ -103,6 +103,14 @@ interface ProjectStats {
   completed: number;
 }
 
+interface Application {
+  id: number;
+  userId: number;
+  projectId: number;
+  status: string;
+  appliedAt: string;
+}
+
 type ModalType = 'status' | 'content' | 'applications' | 'delete' | null;
 
 export default function MyProjectsPage() {
@@ -132,7 +140,7 @@ export default function MyProjectsPage() {
   // 📝 폼 데이터 상태
   const [newStatus, setNewStatus] = useState('');
   const [newContent, setNewContent] = useState('');
-  const [applications, setApplications] = useState<any[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
 
   // ============================================
   // 🔗 API 호출 함수들 (백엔드 컨트롤러와 1:1 대응)
@@ -448,12 +456,12 @@ export default function MyProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen">
+<div className="min-h-screen bg-background text-foreground">
       {/* 헤더 */}
       <header className="border-b sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" asChild className="btn-neon">
               <Link href="/">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 메인으로
@@ -461,7 +469,7 @@ export default function MyProjectsPage() {
             </Button>
             
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs badge-neon">
                 내 프로젝트: {projects.length}개
               </Badge>
               <span className="text-sm text-muted-foreground">

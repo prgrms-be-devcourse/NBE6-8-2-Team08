@@ -4,8 +4,8 @@
  * 
  * 🔄 동기화 상태:
  * - ✅ GET /applications/{id} - 백엔드 구현완료
- * - ❌ POST /applications/{id}/status - 백엔드 미구현 (DTO만 존재)
- * - ❌ 지원서 생성 API - 백엔드 완전 미구현
+ * - ✅ PUT /applications/{id}/status - 프론트엔드 구현완료
+ * - ✅ POST /applications - 프론트엔드 구현완료
  */
 
 import axios from 'axios';
@@ -39,8 +39,23 @@ export interface ApplicationDetailResponse {
  * 현재 상태: 빈 클래스 (필드 미정의)
  */
 export interface ApplicationStatusUpdateRequest {
-  // ⚠️ 백엔드에서 필드 정의 필요
-  status?: string;
+  status: string;
+}
+
+/**
+ * 📄 ApplicationCreateRequest (백엔드 DTO 기준)
+ * 백엔드 파일: ApplicationCreateRequestDto.java
+ * 
+ * 백엔드 요청 구조:
+ * - projectId: Long
+ * - skillScores: List<SkillScoreRequest> (기술 스택별 점수)
+ */
+export interface ApplicationCreateRequest {
+  projectId: number;
+  skillScores: Array<{
+    techName: string;
+    score: number;
+  }>;
 }
 
 /**
@@ -73,52 +88,37 @@ export const deleteApplication = async (id: number): Promise<void> => {
 };
 
 /**
- * ❌ 백엔드 기본구현 - PUT /applications/{id}/status
+ * ✅ 프론트엔드 구현완료 - PUT /applications/{id}/status
  * 백엔드: ApplicationController.updateApplicationStatus()
- * 현재 상태: ApplicationStatusUpdateRequest DTO가 빈 클래스
  * 
- * 문제점:
- * 1. ApplicationStatusUpdateRequest에 필드 정의 안됨
- * 2. 실제 상태 업데이트 로직 미구현
- * 3. 어떤 상태값들이 유효한지 불명확
+ * 구현 내용:
+ * 1. ApplicationStatusUpdateRequest DTO에 status 필드 정의
+ * 2. 지원서 상태 업데이트 API 연동
  */
 export const updateApplicationStatus = async (
   id: number, 
   updateData: ApplicationStatusUpdateRequest
 ): Promise<void> => {
-  // ⚠️ 현재 백엔드 DTO가 비어있어서 어떤 데이터를 보내야 하는지 불명확
-  const response = await axios.put(`${API_BASE_URL}/applications/${id}/status`, updateData);
-  // 예상 응답: ApiResponse<String> 하지만 실제 구현 필요
+  await axios.put(`${API_BASE_URL}/applications/${id}/status`, updateData);
 };
 
 /**
- * ❌ 백엔드 완전 미구현 - POST /applications
- * 예상 엔드포인트: ApplicationController.createApplication()
+ * ✅ 프론트엔드 구현완료 - POST /applications
+ * 백엔드: ApplicationController.createApplication() (추가 필요)
  * 
- * 미구현 사항:
- * 1. 컨트롤러 메서드 자체가 존재하지 않음
- * 2. 지원서 생성 DTO 없음
- * 3. 어떤 프로젝트에 지원하는 API인지 불명확
+ * 구현 내용:
+ * 1. ApplicationCreateRequest DTO 정의
+ * 2. 지원서 생성 API 연동
  */
-export const createApplication = async (applicationData: any): Promise<ApplicationDetailResponse> => {
-  throw new Error('❌ 백엔드 미구현: 지원서 생성 API가 아직 구현되지 않았습니다.');
-  
-  // 예상 구현:
-  // const response = await axios.post(`${API_BASE_URL}/applications`, applicationData);
-  // return response.data.data;
+export const createApplication = async (applicationData: ApplicationCreateRequest): Promise<ApplicationDetailResponse> => {
+  const response = await axios.post(`${API_BASE_URL}/applications`, applicationData);
+  return response.data.data;
 };
 
 /**
  * 📋 구현 우선순위 제안:
  * 
- * 1. ApplicationStatusUpdateRequest DTO 필드 정의
- *    - status: ApplicationStatus enum 값
- * 
- * 2. updateApplicationStatus 실제 로직 구현
- *    - 지원서 상태 변경 (PENDING, APPROVED, REJECTED 등)
- * 
- * 3. createApplication API 전체 구현
- *    - ApplicationCreateRequest DTO 생성
- *    - 프로젝트 ID와 연결하는 로직
- *    - 중복 지원 방지 로직
+ * 1. 백엔드 ApplicationController에 createApplication 메서드 추가
+ * 2. ApplicationCreateRequestDto 백엔드 DTO 구현
+ * 3. ApplicationService에 createApplication 로직 구현
  */

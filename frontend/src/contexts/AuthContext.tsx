@@ -1,11 +1,8 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface User {
-  id: number;
-  name: string;
-}
+import { authApi } from '@/lib/api/auth';
+import { User } from '@/types';
 
 interface AuthContextType {
   user: User | null;
@@ -21,25 +18,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔗 API 연결 예정: 세션 확인
+  // 🔗 API 연결 완료: 세션 확인
   // 백엔드 세션 기반 인증 시스템과 연결
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // TODO: 실제 세션 확인 API 호출
-        // const response = await fetch('/api/auth/me', {
-        //   credentials: 'include',
-        // });
-        // 
-        // if (response.ok) {
-        //   const userData = await response.json();
-        //   setUser(userData);
-        // }
-        
-        // 현재는 로컬스토리지에서 사용자 정보 확인 (임시)
-        const savedUser = localStorage.getItem('devmatch-user');
-        if (savedUser) {
-          setUser(JSON.parse(savedUser));
+        // 실제 세션 확인 API 호출
+        const userData = await authApi.getCurrentUser();
+        if (userData) {
+          setUser(userData);
         }
       } catch (error) {
         console.error('Auth status check failed:', error);
@@ -51,27 +38,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkAuthStatus();
   }, []);
 
-  const login = (userData: User) => {
+  const login = async (userData: User) => {
     setUser(userData);
-    // 임시로 로컬스토리지에 저장 (실제로는 세션 쿠키 사용)
-    localStorage.setItem('devmatch-user', JSON.stringify(userData));
+    // 세션 쿠키를 사용하므로 로컬스토리지 저장 불필요
   };
 
   const logout = async () => {
     try {
-      // TODO: 실제 로그아웃 API 호출
-      // await fetch('/api/auth/logout', {
-      //   method: 'POST',
-      //   credentials: 'include',
-      // });
-      
+      // 실제 로그아웃 API 호출
+      await authApi.logout();
       setUser(null);
-      localStorage.removeItem('devmatch-user');
     } catch (error) {
       console.error('Logout failed:', error);
       // 클라이언트에서라도 로그아웃 처리
       setUser(null);
-      localStorage.removeItem('devmatch-user');
     }
   };
 

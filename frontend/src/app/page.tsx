@@ -88,7 +88,20 @@ export default function Home() {
   const { user, login, logout, isAuthenticated } = useAuth();
   
   // 📊 프로젝트 목록 상태 (백엔드: ProjectController.getAll())
-  const [projects, setProjects] = useState<ProjectDetailResponse[]>([]);
+  const [projects, setProjects] = useState<ProjectDetailResponse[]>([
+    {
+      id: 999,
+      title: "더미 프로젝트",
+      description: "메인 페이지에 표시되는 더미 프로젝트입니다.",
+      techStacks: ["React", "TypeScript", "TailwindCSS"],
+      teamSize: 5,
+      currentTeamSize: 2,
+      creator: "관리자",
+      status: "RECRUITING",
+      content: "이 프로젝트는 메인 페이지에 표시되는 더미 데이터입니다.",
+      createdAt: new Date().toISOString(),
+    }
+  ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -97,6 +110,7 @@ export default function Home() {
   // 👤 사용자 대시보드 상태 (백엔드: UserController 연동)
   const [userDashboard, setUserDashboard] = useState<UserDashboard | null>(null);
   const [userLoading, setUserLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
 
   // ============================================
   // 🔗 API 호출 함수들 (백엔드 컴트롤러와 1:1 대응)
@@ -266,14 +280,14 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       {/* 헤더 */}
-      <header className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="border-b-2 border-black sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* 로고 */}
             <div className="flex items-center space-x-3">
-              <h1 className="text-2xl font-bold">
+<h1 className="text-2xl font-black text-primary">
                 DevMatch
               </h1>
               <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">
@@ -327,7 +341,7 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* 히어로 섹션 */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4">
+          <h2 className="text-4xl sm:text-5xl font-black tracking-tight mb-4">
             🚀 개발 프로젝트를 찾아보세요
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
@@ -336,24 +350,24 @@ export default function Home() {
           </p>
           
           {/* 주요 기능 소개 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="p-6 rounded-lg bg-muted/50">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="p-6 rounded-lg bg-muted/50 neo-card hover:shadow-brutal-lg transition-all duration-200">
               <div className="text-2xl mb-3">👥</div>
-              <h3 className="font-semibold mb-2">팀 매칭</h3>
+              <h3 className="font-black mb-2">팀 매칭</h3>
               <p className="text-sm text-muted-foreground">
                 기술 스택과 관심사가 맞는 팀원들과 함께
               </p>
             </div>
-            <div className="p-6 rounded-lg bg-muted/50">
+            <div className="p-6 rounded-lg bg-muted/50 neo-card hover:shadow-brutal-lg transition-all duration-200">
               <div className="text-2xl mb-3">🎯</div>
-              <h3 className="font-semibold mb-2">프로젝트 추천</h3>
+              <h3 className="font-black mb-2">프로젝트 추천</h3>
               <p className="text-sm text-muted-foreground">
                 AI가 분석한 맞춤형 프로젝트 추천
               </p>
             </div>
-            <div className="p-6 rounded-lg bg-muted/50">
+            <div className="p-6 rounded-lg bg-muted/50 neo-card hover:shadow-brutal-lg transition-all duration-200">
               <div className="text-2xl mb-3">💼</div>
-              <h3 className="font-semibold mb-2">포트폴리오</h3>
+              <h3 className="font-black mb-2">포트폴리오</h3>
               <p className="text-sm text-muted-foreground">
                 실무 경험으로 포트폴리오 완성
               </p>
@@ -397,9 +411,9 @@ export default function Home() {
                     <CardContent className="p-6">
                       <div className="flex items-center space-x-2">
                         <Briefcase className="h-4 w-4 text-blue-500" />
-                        <span className="text-sm font-medium">내 프로젝트</span>
+                        <span className="text-sm font-black">내 프로젝트</span>
                       </div>
-                      <div className="text-2xl font-bold mt-2">{userDashboard.totalProjects}</div>
+                      <div className="text-2xl font-black mt-2">{userDashboard.totalProjects}</div>
                       <p className="text-xs text-muted-foreground mt-1">만든 프로젝트 수</p>
                     </CardContent>
                   </Card>
@@ -409,9 +423,9 @@ export default function Home() {
                     <CardContent className="p-6">
                       <div className="flex items-center space-x-2">
                         <Users className="h-4 w-4 text-green-500" />
-                        <span className="text-sm font-medium">지원서</span>
+                        <span className="text-sm font-black">지원서</span>
                       </div>
-                      <div className="text-2xl font-bold mt-2">{userDashboard.totalApplications}</div>
+                      <div className="text-2xl font-black mt-2">{userDashboard.totalApplications}</div>
                       <p className="text-xs text-muted-foreground mt-1">지원한 총 개수</p>
                     </CardContent>
                   </Card>
@@ -421,9 +435,9 @@ export default function Home() {
                     <CardContent className="p-6">
                       <div className="flex items-center space-x-2">
                         <Award className="h-4 w-4 text-yellow-500" />
-                        <span className="text-sm font-medium">승인</span>
+                        <span className="text-sm font-black">승인</span>
                       </div>
-                      <div className="text-2xl font-bold mt-2">{userDashboard.approvedApplications}</div>
+                      <div className="text-2xl font-black mt-2">{userDashboard.approvedApplications}</div>
                       <p className="text-xs text-muted-foreground mt-1">승인된 지원서</p>
                     </CardContent>
                   </Card>
@@ -433,9 +447,9 @@ export default function Home() {
                     <CardContent className="p-6">
                       <div className="flex items-center space-x-2">
                         <Clock className="h-4 w-4 text-orange-500" />
-                        <span className="text-sm font-medium">대기중</span>
+                        <span className="text-sm font-black">대기중</span>
                       </div>
-                      <div className="text-2xl font-bold mt-2">{userDashboard.pendingApplications}</div>
+                      <div className="text-2xl font-black mt-2">{userDashboard.pendingApplications}</div>
                       <p className="text-xs text-muted-foreground mt-1">대기중인 지원서</p>
                     </CardContent>
                   </Card>
@@ -446,16 +460,15 @@ export default function Home() {
                   <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
                     <div className="text-red-500 text-2xl">⚠️</div>
                   </div>
-                  <h4 className="font-semibold mb-2 text-red-600">대시보드 로드 실패</h4>
+                  <h4 className="font-black mb-2 text-red-600">대시보드 로드 실패</h4>
                   <p className="text-muted-foreground text-sm mb-4">
                     사용자 데이터를 불러올 수 없습니다.<br/>
                     네트워크 연결이나 서버 상태를 확인해주세요.
                   </p>
                   <Button 
-                    variant="outline" 
+                    variant="destructive"
                     size="sm"
                     onClick={() => window.location.reload()}
-                    className="text-red-600 border-red-200 hover:bg-red-50"
                   >
                     다시 시도
                   </Button>
@@ -486,7 +499,7 @@ export default function Home() {
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full h-10 px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  className="w-full h-12 px-3 py-2 text-sm bg-background border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 shadow-brutal-sm"
                 >
                   <option value="ALL">전체 상태</option>
                   <option value="RECRUITING">모집중</option>
@@ -515,11 +528,11 @@ export default function Home() {
             <div className="mx-auto w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
               <div className="text-red-500 text-4xl">⚠️</div>
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-red-600">서버 연결 실패</h3>
+            <h3 className="text-xl font-black mb-2 text-red-600">서버 연결 실패</h3>
             <p className="text-muted-foreground mb-4">{error}</p>
             <Button 
               onClick={() => window.location.reload()}
-              className="bg-red-500 hover:bg-red-600"
+              variant="destructive"
             >
               다시 시도
             </Button>
@@ -546,7 +559,7 @@ export default function Home() {
                   </div>
                 </CardContent>
                 <div className="px-6 pb-6">
-                  <div className="pt-4 border-t">
+                  <div className="pt-4 border-t-2 border-black">
                     <div className="flex justify-between">
                       <Skeleton className="h-4 w-20" />
                       <div className="flex items-center gap-2">
@@ -565,7 +578,7 @@ export default function Home() {
             <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
               <Search className="w-10 h-10 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">
+            <h3 className="text-xl font-black mb-2">
               {projects.length === 0 ? '등록된 프로젝트가 없습니다' : '검색 결과가 없습니다'}
             </h3>
             <p className="text-muted-foreground">
@@ -577,7 +590,7 @@ export default function Home() {
           <>
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-2">
-                <span className="font-semibold">
+                <span className="font-black">
                   총 {filteredProjects.length}개의 프로젝트
                 </span>
               </div>
@@ -603,11 +616,11 @@ export default function Home() {
       {/* ============================================ */}
       {/* 🦶 푸터 섹션 (프로젝트 정보 및 API 연결 상태) */}
       {/* ============================================ */}
-      <footer className="border-t mt-20 bg-muted/30">
+      <footer className="border-t-2 border-black mt-20 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <h3 className="text-lg font-bold">DevMatch</h3>
+              <h3 className="text-lg font-black">DevMatch</h3>
               <Badge variant="outline" className="text-xs">
                 Frontend-Backend 연동 완료
               </Badge>
@@ -618,18 +631,18 @@ export default function Home() {
             </p>
             
             {/* 📡 API 연결 상태 표시 */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-6">
-              <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-50 border border-green-200">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-6">
+              <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-50 border-2 border-black neo-card hover:shadow-brutal transition-all duration-200">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-green-700">프로젝트 API</span>
+                <span className="text-sm text-green-700 font-black">프로젝트 API</span>
               </div>
-              <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
+              <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-blue-50 border-2 border-black neo-card hover:shadow-brutal transition-all duration-200">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-sm text-blue-700">사용자 API</span>
+                <span className="text-sm text-blue-700 font-black">사용자 API</span>
               </div>
-              <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-purple-50 border border-purple-200">
+              <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-purple-50 border-2 border-black neo-card hover:shadow-brutal transition-all duration-200">
                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span className="text-sm text-purple-700">지원서 API</span>
+                <span className="text-sm text-purple-700 font-black">지원서 API</span>
               </div>
             </div>
             
