@@ -1,11 +1,12 @@
 package com.devmatch.backend.domain.analysis.dto;
 
 import com.devmatch.backend.domain.analysis.entity.AnalysisResult;
+import java.math.BigDecimal;
 
 public record AnalysisResultResponse(
     Long id,
     Long applicationId,
-    double compatibilityScore,
+    BigDecimal compatibilityScore,
     String compatibilityReason
 ) {
 

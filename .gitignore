@@ -20,3 +20,8 @@ Thumbs.db
 .env
 .env.local
 *.secret
+
+# Database files
+*.db
+*.trace.db
+db_*
