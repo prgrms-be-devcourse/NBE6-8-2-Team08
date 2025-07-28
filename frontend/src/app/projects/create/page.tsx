@@ -13,6 +13,19 @@ import Link from 'next/link';
 import { createProject, ProjectDetailResponse } from '@/lib/api/project';
 
 // ============================================
+// 📊 타입 정의
+// ============================================
+
+interface ProjectCreateRequest {
+  userId: number;
+  title: string;
+  description: string;
+  techStack: string;
+  teamSize: number;
+  durationWeeks: number;
+}
+
+// ============================================
 // 🔐 인증 컨텍스트 (로그인 상태 관리)
 // ============================================
 import { useAuth } from '@/contexts/AuthContext';
@@ -318,7 +331,7 @@ export default function CreateProjectPage() {
   // 로그인하지 않은 상태라면 로그인 안내
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="max-w-md w-full">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -342,9 +355,9 @@ export default function CreateProjectPage() {
   }
 
   return (
-    <div className="min-h-screen">
+<div className="min-h-screen bg-background">
       {/* 헤더 */}
-      <header className="border-b sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="border-b-2 border-black sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Button variant="ghost" asChild>
@@ -366,7 +379,7 @@ export default function CreateProjectPage() {
       {/* 메인 컨텐츠 */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">
+          <h1 className="text-4xl font-black mb-2">
             새 프로젝트 만들기
           </h1>
           <p className="text-muted-foreground">
@@ -376,7 +389,7 @@ export default function CreateProjectPage() {
 
         {/* 에러 메시지 표시 */}
         {error && (
-          <div className="mb-6 p-4 border border-red-200 rounded-lg bg-red-50">
+          <div className="mb-6 p-4 border-2 border-red-500 rounded-lg bg-red-50">
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-red-500" />
               <span className="text-red-700 text-sm">{error}</span>
@@ -395,13 +408,13 @@ export default function CreateProjectPage() {
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
                   <Target className="h-6 w-6 text-primary" />
-                  <h2 className="text-2xl font-bold">프로젝트 기본 정보</h2>
+                  <h2 className="text-2xl font-black">프로젝트 기본 정보</h2>
                 </div>
                 
                 <div className="grid grid-cols-1 gap-6">
                   {/* 프로젝트 제목 */}
                   <div className="space-y-2">
-                    <Label htmlFor="title" className="text-base font-medium">
+                    <Label htmlFor="title" className="text-base font-black">
                       프로젝트 제목 *
                     </Label>
                     <Input
@@ -420,7 +433,7 @@ export default function CreateProjectPage() {
                   
                   {/* 프로젝트 설명 */}
                   <div className="space-y-2">
-                    <Label htmlFor="description" className="text-base font-medium">
+                    <Label htmlFor="description" className="text-base font-black">
                       프로젝트 설명 *
                     </Label>
                     <Textarea
@@ -445,13 +458,13 @@ export default function CreateProjectPage() {
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
                   <Code2 className="h-6 w-6 text-primary" />
-                  <h2 className="text-2xl font-bold">기술스택 선택</h2>
+                  <h2 className="text-2xl font-black">기술스택 선택</h2>
                 </div>
                 
                 <div className="space-y-4">
                   {/* 기술스택 입력 */}
                   <div className="space-y-2">
-                    <Label htmlFor="techStackInput" className="text-base font-medium">
+                    <Label htmlFor="techStackInput" className="text-base font-black">
                       기술스택 추가 *
                     </Label>
                     <div className="flex gap-2">
@@ -481,10 +494,10 @@ export default function CreateProjectPage() {
                   {/* 추가된 기술스택 목록 */}
                   {formData.techStacks.length > 0 && (
                     <div className="space-y-2">
-                      <Label className="text-base font-medium">
+                      <Label className="text-base font-black">
                         선택된 기술스택 ({formData.techStacks.length}개)
                       </Label>
-                      <div className="flex flex-wrap gap-2 p-4 border rounded-lg bg-muted/50">
+                      <div className="flex flex-wrap gap-2 p-4 border-2 border-black rounded-lg bg-muted/50">
                         {formData.techStacks.map((tech, index) => (
                           <Badge 
                             key={index} 
@@ -525,13 +538,13 @@ export default function CreateProjectPage() {
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
                   <Users className="h-6 w-6 text-primary" />
-                  <h2 className="text-2xl font-bold">팀 구성 및 일정</h2>
+                  <h2 className="text-2xl font-black">팀 구성 및 일정</h2>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* 팀 크기 설정 */}
                   <div className="space-y-3">
-                    <Label className="text-base font-medium">
+                    <Label className="text-base font-black">
                       목표 팀 크기 *
                     </Label>
                     <div className="flex items-center gap-4">
@@ -548,7 +561,7 @@ export default function CreateProjectPage() {
                         <Minus className="h-4 w-4" />
                       </Button>
                       <div className="text-center">
-                        <div className="text-3xl font-bold text-primary">
+                        <div className="text-3xl font-black text-primary">
                           {formData.teamSize}
                         </div>
                         <div className="text-sm text-muted-foreground">
@@ -574,7 +587,7 @@ export default function CreateProjectPage() {
                   
                   {/* 프로젝트 기간 설정 */}
                   <div className="space-y-3">
-                    <Label className="text-base font-medium">
+                    <Label className="text-base font-black">
                       프로젝트 기간 *
                     </Label>
                     <Select 
@@ -608,7 +621,7 @@ export default function CreateProjectPage() {
               {/* ============================================ */}
               {/* 📋 프로젝트 생성 버튼 섹션 */}
               {/* ============================================ */}
-              <div className="pt-6 border-t">
+              <div className="pt-6 border-t-2 border-black">
                 <Button
                   type="button"
                   onClick={handleSubmit}
@@ -651,18 +664,18 @@ export default function CreateProjectPage() {
               {/* 기본 정보 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">프로젝트 제목</p>
-                  <p className="font-semibold">{formData.title || '미입력'}</p>
+                  <p className="text-sm font-black text-muted-foreground mb-1">프로젝트 제목</p>
+                  <p className="font-black">{formData.title || '미입력'}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">팀 크기</p>
-                  <p className="font-semibold">{formData.teamSize}명</p>
+                  <p className="text-sm font-black text-muted-foreground mb-1">팀 크기</p>
+                  <p className="font-black">{formData.teamSize}명</p>
                 </div>
               </div>
               
               {/* 설명 */}
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">프로젝트 설명</p>
+                <p className="text-sm font-black text-muted-foreground mb-1">프로젝트 설명</p>
                 <p className="text-sm">
                   {formData.description || '미입력'}
                 </p>
@@ -671,7 +684,7 @@ export default function CreateProjectPage() {
               {/* 기술스택과 기간 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">기술스택</p>
+                  <p className="text-sm font-black text-muted-foreground mb-1">기술스택</p>
                   {formData.techStacks.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {formData.techStacks.map((tech, index) => (
@@ -685,8 +698,8 @@ export default function CreateProjectPage() {
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">프로젝트 기간</p>
-                  <p className="font-semibold">
+                  <p className="text-sm font-black text-muted-foreground mb-1">프로젝트 기간</p>
+                  <p className="font-black">
                     {durationOptions.find(opt => opt.value === formData.durationWeeks)?.label || '미선택'}
                   </p>
                 </div>
@@ -694,7 +707,7 @@ export default function CreateProjectPage() {
               
               {/* 백엔드 전송 데이터 미리보기 */}
               <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-                <p className="text-xs font-medium text-muted-foreground mb-2">백엔드 전송 데이터</p>
+                <p className="text-xs font-black text-muted-foreground mb-2">백엔드 전송 데이터</p>
                 <pre className="text-xs text-muted-foreground">
                   {JSON.stringify({
                     userId: user?.id || 'USER_ID',

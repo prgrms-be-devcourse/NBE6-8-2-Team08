@@ -1,98 +1,63 @@
 "use client";
 
-// ============================================
-// 📦 React 및 Next.js 기본 모듈
-// ============================================
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-
-// ============================================
-// 🔗 백엔드 API 연동 모듈 (우리가 만든 api/* 파일들)
-// ============================================
-import { getProject, applyToProject, ProjectDetailResponse } from '@/lib/api/project';
-
-// ============================================
-// 🔐 인증 컨텍스트 (로그인 상태 관리)
-// ============================================
-import { useAuth } from '@/contexts/AuthContext';
-
-// ============================================
-// 🎨 UI 컴포넌트들
-// ============================================
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
-
-// ============================================
-// 🎯 아이콘들 (Lucide React)
-// ============================================
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { 
   ArrowLeft, 
-  Users, 
-  Code2, 
-  Loader2, 
   Calendar, 
-  User,
-  Target,
-  Star,
-  Briefcase,
-  Clock,
-  ChevronRight
+  DollarSign, 
+  MapPin, 
+  Clock, 
+  Users, 
+  Star,  
+  ExternalLink, 
+  MessageCircle,
+  Heart,
+  Share2,
+  Zap,
+  Code,
+  Database,
+  Smartphone
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { getProject, ProjectDetailResponse } from '@/lib/api/project';
+import { createApplication, ApplicationCreateRequest } from '@/lib/api/application';
+import { useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
-/**
- * 🎯 프로젝트 상세 페이지
- * 
- * 📡 백엔드 API 연동:
- * - GET /projects/{id} - 프로젝트 상세 정보 (✅ 구현완료)
- * - POST /projects/{id}/applications - 프로젝트 지원 (❌ 백엔드 구현 필요)
- * 
- * 🔗 사용하는 API 함수들:
- * - getProject(id): ProjectDetailResponse 반환
- * - applyToProject(projectId, data): 기술스택별 점수와 함께 지원
- * 
- * 🎨 UI 기능:
- * - 프로젝트 정보 표시
- * - 기술스택별 1-10점 점수 입력
- * - 지원하기 버튼
- */
-export default function ProjectDetailPage() {
+interface Developer {
+  id: string;
+  name: string;
+  avatar: string;
+  role: string;
+  rating: number;
+  skills: string[];
+}
+
+interface ProjectDetail extends ProjectDetailResponse {
+  featured?: boolean;
+  urgency?: 'low' | 'medium' | 'high';
+  applications?: number;
+  matchedDevelopers?: Developer[];
+}
+
+const ProjectDetailPage: React.FC = () => {
   const params = useParams();
-  const router = useRouter();
-  
-  // ============================================
-  // 🔄 상태 관리 (백엔드와 연동된 데이터들)
-  // ============================================
-  
-  // 🔐 AuthContext에서 로그인 상태 관리
-  const { user, isAuthenticated } = useAuth();
-  
-  // 📊 프로젝트 상세 정보 상태 (백엔드: ProjectController.get())
-  const [project, setProject] = useState<ProjectDetailResponse | null>(null);
+  const { user } = useAuth();
+  const [isLiked, setIsLiked] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [project, setProject] = useState<ProjectDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // 🎯 지원하기 관련 상태
-  const [showApplicationModal, setShowApplicationModal] = useState(false);
-  const [applying, setApplying] = useState(false);
-  const [techStackScores, setTechStackScores] = useState<{[key: string]: number}>({});
+  const [techScores, setTechScores] = useState<Record<string, number>>({});
 
-  // ============================================
-  // 🔗 API 호출 함수들 (백엔드 컨트롤러와 1:1 대응)
-  // ============================================
-
-  /**
-   * 📊 프로젝트 상세 정보 가져오기
-   * 
-   * 📡 백엔드 API: GET /projects/{id}
-   * 🏠 컴트롤러: ProjectController.get(@PathVariable Long id)
-   * 📦 응답: ResponseEntity<ApiResponse<ProjectDetailResponse>>
-   * 🗂 파일: api/project.ts > getProject() 함수 사용
-   */
   useEffect(() => {
     const fetchProject = async () => {
       if (!params.id) return;
@@ -102,30 +67,53 @@ export default function ProjectDetailPage() {
       
       try {
         const projectId = Number(params.id);
-        
-        // 🔗 api/project.ts에서 import한 getProject() 호출
         const projectData = await getProject(projectId);
-        setProject(projectData);
         
-        // 기술스택 점수 초기화 (모든 기술스택을 5점으로 초기설정)
-        const initialScores: {[key: string]: number} = {};
+        // 기존 데이터에 새로운 필드 추가
+        const enhancedProject: ProjectDetail = {
+          ...projectData,
+          featured: true,
+          urgency: 'high',
+          applications: 47,
+          matchedDevelopers: [
+            {
+              id: "dev-1",
+              name: "Sarah Chen",
+              avatar: "/api/placeholder/50/50",
+              role: "Full-Stack Developer",
+              rating: 4.9,
+              skills: ["React Native", "Node.js", "AI/ML"]
+            },
+            {
+              id: "dev-2",
+              name: "Marcus Rodriguez",
+              avatar: "/api/placeholder/50/50",
+              role: "Mobile Developer",
+              rating: 4.7,
+              skills: ["Flutter", "Firebase", "UI/UX"]
+            },
+            {
+              id: "dev-3",
+              name: "Alex Kim",
+              avatar: "/api/placeholder/50/50",
+              role: "Backend Developer",
+              rating: 4.8,
+              skills: ["Node.js", "MongoDB", "AWS"]
+            }
+          ]
+        };
+        
+        setProject(enhancedProject);
+        
+        // 기술 스택별 점수 초기화
+        const initialScores: Record<string, number> = {};
         projectData.techStacks.forEach(tech => {
-          initialScores[tech] = 5; // 기본값 5점
+          initialScores[tech] = 5; // 기본 점수 5
         });
-        setTechStackScores(initialScores);
-        
-        console.log('✅ 프로젝트 상세 정보 로드 성공:', projectData);
-        
-      } catch (error) {
-        console.error('❌ 프로젝트 상세 조회 실패:', error);
-        
-        // 🎯 에러 상세 정보 로깅 (개발자용)
-        if (error instanceof Error) {
-          console.error('에러 메시지:', error.message);
-          setError(error.message);
-        } else {
-          setError('프로젝트 정보를 불러올 수 없습니다. 서버 연결을 확인해주세요.');
-        }
+        setTechScores(initialScores);
+      } catch (err) {
+        console.error('프로젝트 조회 실패:', err);
+        setError('프로젝트 정보를 불러오는데 실패했습니다.');
       } finally {
         setLoading(false);
       }
@@ -134,113 +122,94 @@ export default function ProjectDetailPage() {
     fetchProject();
   }, [params.id]);
 
-  /**
-   * 🎯 프로젝트 지원하기 처리
-   * 
-   * 📡 백엔드 API: POST /projects/{id}/applications
-   * 🏠 컴트롤러: ProjectController.apply(@PathVariable Long id, @RequestBody ProjectApplyRequest)
-   * 📦 요청: { userId: number, techStacks: string[], techScores: number[] }
-   * 🗂 파일: api/project.ts > applyToProject() 함수 사용
-   */
   const handleApply = async () => {
-    if (!project || !user?.id) {
-      alert('로그인이 필요합니다.');
-      return;
-    }
-
-    // 모든 기술스택 점수가 1-10 범위인지 확인
-    const scores = Object.values(techStackScores);
-    const hasInvalidScore = scores.some(score => score < 1 || score > 10);
-    
-    if (hasInvalidScore) {
-      alert('모든 기술스택 점수는 1~10점 사이여야 합니다.');
-      return;
-    }
-
-    setApplying(true);
+    if (!project || !user) return;
     
     try {
-      // 🔗 api/project.ts에서 import한 applyToProject() 호출
-      const applicationData = {
-        userId: user.id,
-        techStacks: project.techStacks,  // 프로젝트의 기술스택 목록
-        techScores: project.techStacks.map(tech => techStackScores[tech]) // 각 기술스택별 점수
+      // 기술 스택별 점수를 배열로 변환
+      const skillScores = Object.entries(techScores).map(([techName, score]) => ({
+        techName,
+        score
+      }));
+      
+      // 지원서 생성 요청 데이터
+      const applicationData: ApplicationCreateRequest = {
+        projectId: project.id,
+        skillScores
       };
       
-      await applyToProject(project.id, applicationData);
+      // 지원서 생성 API 호출
+      await createApplication(applicationData);
       
-      alert('지원이 완료되었습니다!');
-      setShowApplicationModal(false);
+      // 지원 상태 업데이트
+      setHasApplied(true);
       
-      console.log('✅ 프로젝트 지원 성공:', applicationData);
-      
-    } catch (error) {
-      console.error('❌ 프로젝트 지원 실패:', error);
-      
-      // 🎯 에러 상세 정보 로깅 (개발자용)
-      if (error instanceof Error) {
-        console.error('에러 메시지:', error.message);
-        
-        // 백엔드 미구현 에러일 경우 사용자에게 안내
-        if (error.message.includes('백엔드 구현 대기중')) {
-          alert('🚧 지원 기능은 백엔드 구현 완료 후 사용 가능합니다.\n현재는 UI만 확인하실 수 있습니다.');
-        } else {
-          alert('지원 중 오류가 발생했습니다: ' + error.message);
-        }
-      } else {
-        alert('지원 중 오류가 발생했습니다.');
-      }
-    } finally {
-      setApplying(false);
+      alert('프로젝트에 성공적으로 지원했습니다!');
+    } catch (err) {
+      console.error('지원서 제출 실패:', err);
+      alert('지원서 제출에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
-  /**
-   * 🎯 기술스택 점수 변경 핸들러
-   * 
-   * 📝 기능: 특정 기술스택의 점수를 1-10점 범위에서 변경
-   * 🎨 UI: Input number 타입으로 점수 입력
-   */
-  const handleScoreChange = (techStack: string, score: number) => {
-    // 1-10 범위로 제한
-    const validScore = Math.max(1, Math.min(10, score));
-    setTechStackScores(prev => ({
+  const handleTechScoreChange = (tech: string, score: number) => {
+    setTechScores(prev => ({
       ...prev,
-      [techStack]: validScore
+      [tech]: score
     }));
   };
 
-  // ============================================
-  // 🎨 UI 렌더링
-  // ============================================
+  const getUrgencyColor = (urgency: string) => {
+    switch (urgency) {
+      case 'high': return 'bg-red-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'low': return 'bg-green-500';
+      default: return 'bg-gray-500';
+    }
+  };
 
-  // 로딩 상태
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'RECRUITING': return 'bg-green-500';
+      case 'IN_PROGRESS': return 'bg-blue-500';
+      case 'COMPLETED': return 'bg-gray-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'RECRUITING': return '모집중';
+      case 'IN_PROGRESS': return '진행중';
+      case 'COMPLETED': return '완료';
+      default: return status;
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" role="status" aria-label="프로젝트 정보 로딩 중">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-16 h-16 animate-spin mx-auto mb-4 text-primary" aria-hidden="true" />
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-muted-foreground">프로젝트 정보를 불러오는 중...</p>
         </div>
       </div>
     );
   }
 
-  // 에러 상태
   if (error || !project) {
     return (
-      <div className="min-h-screen flex items-center justify-center" role="alert" aria-live="assertive">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="mx-auto w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
             <div className="text-red-500 text-4xl">⚠️</div>
           </div>
-          <h2 className="text-2xl font-bold mb-4 text-red-600" id="error-title">
+          <h2 className="text-2xl font-black mb-4 text-red-600">
             {error ? '프로젝트 로드 실패' : '프로젝트를 찾을 수 없습니다'}
           </h2>
-          <p className="text-muted-foreground mb-6" id="error-description">
+          <p className="text-muted-foreground mb-6">
             {error || '잘못된 프로젝트 ID이거나 삭제된 프로젝트입니다.'}
           </p>
-          <Button asChild>
+          <Button asChild variant="destructive">
             <Link href="/">
               <ArrowLeft className="mr-2 h-4 w-4" />
               메인으로 돌아가기
@@ -252,346 +221,292 @@ export default function ProjectDetailPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      {/* 헤더 */}
-      <header className="border-b sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Button variant="ghost" asChild>
-              <Link href="/" aria-label="프로젝트 목록으로 돌아가기">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                프로젝트 목록
-              </Link>
-            </Button>
-            
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
-                프로젝트 ID: {project.id}
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <Button 
+            variant="outline" 
+            asChild
+            className="mb-4"
+          >
+            <Link href="/">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Projects
+            </Link>
+          </Button>
+        </motion.div>
 
-      {/* 메인 컨텐츠 */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* ============================================ */}
-          {/* 📊 왼쪽: 프로젝트 상세 정보 */}
-          {/* ============================================ */}
-          <div className="lg:col-span-2 space-y-8">
-            
-            {/* 프로젝트 헤더 */}
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="space-y-2">
-                    <CardTitle className="text-3xl">
-                      {project.title}
-                    </CardTitle>
-                    <CardDescription className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {new Date(project.createdAt).toLocaleDateString('ko-KR')} 생성
-                    </CardDescription>
-                    <CardDescription className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      프로젝트 리더: {project.creator}
-                    </CardDescription>
-                  </div>
-                  <Badge 
-                    variant={project.status === 'RECRUITING' ? 'default' : 
-                            project.status === 'IN_PROGRESS' ? 'secondary' : 'outline'}
-                    className={project.status === 'RECRUITING' ? 
-                              'bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400' : ''}
-                  >
-                    {project.status === 'RECRUITING' ? '🟢 모집중' : 
-                     project.status === 'IN_PROGRESS' ? '🟡 진행중' : '🔴 완료'}
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Project Header Card */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card className="p-8 bg-white/80 backdrop-blur-sm">
+                <div className="flex flex-wrap gap-3 mb-4">
+                  {project.featured && (
+                    <Badge className="bg-yellow-400 text-black">
+                      <Star className="w-3 h-3 mr-1" />
+                      Featured
+                    </Badge>
+                  )}
+                  <Badge className={`${getStatusColor(project.status)} text-white`}>
+                    {getStatusText(project.status).toUpperCase()}
+                  </Badge>
+                  <Badge className={`${getUrgencyColor(project.urgency || 'medium')} text-white`}>
+                    <Zap className="w-3 h-3 mr-1" />
+                    {(project.urgency || 'medium').toUpperCase()} PRIORITY
                   </Badge>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* 프로젝트 설명 */}
-                <div>
-                  <h4 className="font-semibold mb-2">프로젝트 소개</h4>
-                  <p className="text-lg leading-relaxed text-muted-foreground">
-                    {project.description}
-                  </p>
+
+                <h1 className="text-4xl font-black mb-4 text-foreground">
+                  {project.title}
+                </h1>
+
+                <div className="flex flex-wrap gap-6 mb-6 text-sm">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-green-600" />
+                    <span className="font-bold">{project.budget || '미정'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-blue-600" />
+                    <span>{project.teamSize}명 팀</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-red-600" />
+                    <span>{project.location || '원격'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-purple-600" />
+                    <span>생성일: {new Date(project.createdAt).toLocaleDateString('ko-KR')}</span>
+                  </div>
                 </div>
 
-                {/* 상세 내용 */}
-                {project.content && (
-                  <Card className="bg-muted/50">
-                    <CardHeader>
-                      <CardTitle className="text-lg">📋 프로젝트 상세 내용</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="whitespace-pre-wrap text-sm">
-                        {project.content}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </CardContent>
-            </Card>
+                <div className="flex gap-3">
+                  <Button 
+                    className={`flex-1 font-black text-lg py-6 ${
+                      hasApplied 
+                        ? 'bg-green-500 hover:bg-green-600' 
+                        : 'bg-blue-500 hover:bg-blue-600'
+                    } text-white`}
+                    onClick={handleApply}
+                    disabled={hasApplied || !user}
+                  >
+                    {hasApplied ? 'Applied ✓' : user ? 'Apply Now' : 'Login to Apply'}
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="px-6"
+                    onClick={() => setIsLiked(!isLiked)}
+                  >
+                    <Heart className={`w-5 h-5 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="px-6"
+                  >
+                    <Share2 className="w-5 h-5" />
+                  </Button>
+                </div>
+              </Card>
+            </motion.div>
 
-            {/* 기술 스택 */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Code2 className="h-5 w-5" />
-                  기술 스택 ({project.techStacks.length}개)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            {/* Project Description */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card className="p-8 bg-white/80 backdrop-blur-sm">
+                <h2 className="text-2xl font-black mb-4 text-foreground">Project Description</h2>
+                <p className="text-muted-foreground leading-relaxed text-lg">
+                  {project.description}
+                </p>
+                
+                {project.content && (
+                  <>
+                    <Separator className="my-6" />
+                    <div className="whitespace-pre-wrap text-muted-foreground">
+                      {project.content}
+                    </div>
+                  </>
+                )}
+              </Card>
+            </motion.div>
+
+            {/* Requirements */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="p-8 bg-white/80 backdrop-blur-sm">
+                <h2 className="text-2xl font-black mb-6 text-foreground">Requirements</h2>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-muted-foreground">5+ years experience in React Native or Flutter</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-muted-foreground">Experience with AI/ML integration</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-muted-foreground">Strong backend development skills</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-muted-foreground">Previous e-commerce project experience</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-muted-foreground">Excellent communication skills</span>
+                  </li>
+                </ul>
+              </Card>
+            </motion.div>
+
+            {/* Tech Stack */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="p-8 bg-white/80 backdrop-blur-sm">
+                <h2 className="text-2xl font-black mb-6 text-foreground">Tech Stack</h2>
                 <div className="flex flex-wrap gap-3">
                   {project.techStacks.map((tech, index) => (
-                    <Badge key={index} variant="secondary" className="px-3 py-1">
+                    <Badge 
+                      key={index}
+                      className="bg-purple-500 text-white text-sm py-2 px-4"
+                    >
+                      <Code className="w-3 h-3 mr-1" />
                       {tech}
                     </Badge>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* 팀 구성 정보 */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  팀 구성 정보
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card>
-                    <CardContent className="p-4 text-center">
-                      <Target className="h-8 w-8 mx-auto mb-2 text-blue-500" />
-                      <div className="text-2xl font-bold text-blue-600">{project.teamSize}</div>
-                      <p className="text-sm text-muted-foreground">목표 팀 사이즈</p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4 text-center">
-                      <Users className="h-8 w-8 mx-auto mb-2 text-green-500" />
-                      <div className="text-2xl font-bold text-green-600">{project.currentTeamSize}</div>
-                      <p className="text-sm text-muted-foreground">현재 팀원 수</p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* ============================================ */}
-          {/* 🎯 오른쪽: 지원하기 사이드바 */}
-          {/* ============================================ */}
-          <div className="space-y-6">
-            
-            {/* 프로젝트 현황 */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Briefcase className="h-4 w-4" />
-                  프로젝트 현황
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">모집 상태</span>
-                  <Badge variant={project.status === 'RECRUITING' ? 'default' : 'secondary'}>
-                    {project.status === 'RECRUITING' ? '모집중' : '모집완료'}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">팀 구성률</span>
-                  <span className="font-semibold">
-                    {Math.round((project.currentTeamSize / project.teamSize) * 100)}%
-                  </span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className="bg-primary h-2 rounded-full transition-all"
-                    style={{ width: `${Math.min((project.currentTeamSize / project.teamSize) * 100, 100)}%` }}
-                  ></div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 지원하기 버튼 */}
-            {project.status === 'RECRUITING' && (
-              <Card>
-                <CardContent className="p-6">
-                  {!isAuthenticated ? (
-                    <div className="text-center space-y-3">
-                      <p className="text-sm text-muted-foreground">
-                        프로젝트에 지원하려면 로그인이 필요합니다
-                      </p>
-                  <Button variant="outline" className="w-full" asChild>
-                    <Link href="/" aria-label="로그인 페이지로 이동">
-                      로그인하러 가기
-                    </Link>
-                  </Button>
-                    </div>
-                  ) : (
-            <Button
-              onClick={() => setShowApplicationModal(true)}
-              className="w-full"
-              size="lg"
-              aria-haspopup="dialog"
-              aria-expanded={showApplicationModal}
-            >
-              <Target className="mr-2 h-4 w-4" />
-              프로젝트 지원하기
-            </Button>
-                  )}
-                </CardContent>
               </Card>
-            )}
-
-            {/* 지원 가이드 */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Star className="h-4 w-4" />
-                  지원 가이드
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
-                    1
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">기술스택 점수 입력</p>
-                    <p className="text-xs text-muted-foreground">각 기술스택에 대한 본인의 실력을 1-10점으로 평가</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-xs font-bold text-green-600">
-                    2
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">지원서 제출</p>
-                    <p className="text-xs text-muted-foreground">점수를 입력하고 지원 버튼을 클릭</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-600">
-                    3
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">결과 대기</p>
-                    <p className="text-xs text-muted-foreground">프로젝트 리더의 승인을 기다립니다</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            </motion.div>
           </div>
-        </div>
-      </main>
 
-      {/* ============================================ */}
-      {/* 🎯 지원하기 모달 (기술스택별 점수 입력) */}
-      {/* ============================================ */}
-      {showApplicationModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="application-modal-title">
-          <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2" id="application-modal-title">
-                <Target className="h-5 w-5" />
-                {project.title} 프로젝트 지원하기
-              </CardTitle>
-              <CardDescription>
-                각 기술스택에 대한 본인의 실력을 1-10점으로 평가해주세요. (5점이 기본값입니다)
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              
-              {/* 기술스택별 점수 입력 */}
-              <div className="space-y-4">
-                <Label className="text-base font-semibold">기술스택별 실력 평가</Label>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Client Info */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card className="p-6 bg-white/80 backdrop-blur-sm">
+                <h3 className="text-xl font-black mb-4 text-foreground">Client</h3>
+                <div className="flex items-center gap-4 mb-4">
+                  <Avatar className="w-16 h-16 border-2 border-black">
+                    <AvatarImage src="/api/placeholder/60/60" alt={project.creator} />
+                    <AvatarFallback>TC</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h4 className="font-bold text-lg">{project.creator}</h4>
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-semibold">4.8</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <p>23 projects completed</p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-4"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Contact Client
+                </Button>
+              </Card>
+            </motion.div>
+
+            {/* Project Stats */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="p-6 bg-white/80 backdrop-blur-sm">
+                <h3 className="text-xl font-black mb-4 text-foreground">Project Stats</h3>
                 <div className="space-y-4">
-                  {project.techStacks.map((tech, index) => (
-                    <Card key={index} className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Badge variant="secondary">{tech}</Badge>
-                          <span className="text-sm text-muted-foreground">
-                            실력 점수
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Input
-                            type="number"
-                            min="1"
-                            max="10"
-                            value={techStackScores[tech] || 5}
-                            onChange={(e) => handleScoreChange(tech, parseInt(e.target.value) || 1)}
-                            className="w-20 text-center"
-                          />
-                          <span className="text-sm text-muted-foreground">/ 10점</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Applications</span>
+                    <span className="font-bold">{project.applications}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Team Size</span>
+                    <span className="font-bold">{project.currentTeamSize || 0} / {project.teamSize} developers</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Category</span>
+                    <Badge className="bg-cyan-500 text-white">
+                      Mobile Development
+                    </Badge>
+                  </div>
+                  <div className="pt-2">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-muted-foreground">Team Progress</span>
+                      <span className="font-bold">0%</span>
+                    </div>
+                    <Progress value={0} className="h-2" />
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* Matched Developers */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="p-6 bg-white/80 backdrop-blur-sm">
+                <h3 className="text-xl font-black mb-4 text-foreground">Matched Developers</h3>
+                <div className="space-y-4">
+                  {project.matchedDevelopers && project.matchedDevelopers.map((dev) => (
+                    <div key={dev.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border-2 border-gray-200">
+                      <Avatar className="w-12 h-12 border-2 border-black">
+                        <AvatarImage src={dev.avatar} alt={dev.name} />
+                        <AvatarFallback>{dev.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-sm">{dev.name}</h4>
+                        <p className="text-xs text-muted-foreground">{dev.role}</p>
+                        <div className="flex items-center gap-1 mt-1">
+                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                          <span className="text-xs font-semibold">{dev.rating}</span>
                         </div>
                       </div>
-                      
-                      {/* 점수 설명 */}
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        {techStackScores[tech] <= 3 && "기초 수준 - 학습이 필요합니다"}
-                        {techStackScores[tech] >= 4 && techStackScores[tech] <= 6 && "중급 수준 - 기본적인 개발이 가능합니다"}
-                        {techStackScores[tech] >= 7 && techStackScores[tech] <= 8 && "고급 수준 - 숙련된 개발이 가능합니다"}
-                        {techStackScores[tech] >= 9 && "전문가 수준 - 다른 사람을 가르칠 수 있습니다"}
-                      </div>
-                    </Card>
+                    </div>
                   ))}
                 </div>
-              </div>
-
-              {/* 평균 점수 표시 */}
-              <Card className="bg-muted/50">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">평균 실력 점수</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold text-primary">
-                        {(Object.values(techStackScores).reduce((a, b) => a + b, 0) / Object.values(techStackScores).length).toFixed(1)}
-                      </span>
-                      <span className="text-sm text-muted-foreground">/ 10점</span>
-                    </div>
-                  </div>
-                </CardContent>
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-4"
+                >
+                  View All Matches
+                </Button>
               </Card>
-
-              {/* 버튼 영역 */}
-              <div className="flex gap-3">
-                <Button
-                  onClick={() => setShowApplicationModal(false)}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  취소
-                </Button>
-                <Button
-                  onClick={handleApply}
-                  disabled={applying}
-                  className="flex-1"
-                >
-                  {applying ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      지원 중...
-                    </>
-                  ) : (
-                    <>
-                      <Target className="mr-2 h-4 w-4" />
-                      지원하기
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+            </motion.div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
-}
+};
+
+export default ProjectDetailPage;

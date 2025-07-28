@@ -22,6 +22,18 @@ export interface User {
   name: string;
 }
 
+// 로그인 요청 타입 (auth.ts에서 필요)
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+// 로그인 응답 타입 (auth.ts에서 필요)
+export interface LoginResponse {
+  token: string;
+  user: User;
+}
+
 // ============================================
 // 🤖 분석 관련 공통 타입  
 // ============================================
@@ -45,6 +57,17 @@ export interface ApplicationEntity {
   projectId: number;
   status: string;
   appliedAt: string;
+}
+
+// 지원서 상태 업데이트 요청 타입 (application.ts에서 필요)
+export interface ApplicationStatusUpdateRequest {
+  status: string;
+}
+
+// 지원서 생성 요청 타입 (application.ts에서 필요)
+export interface ApplicationCreateRequest {
+  projectId: number;
+  // 기술 스택별 점수 등 추가 필드 정의 가능
 }
 
 // ============================================
