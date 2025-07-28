@@ -12,7 +12,12 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/users")
@@ -31,12 +36,13 @@ public class UserController {
   }
 
   @GetMapping("/{id}/projects")
-  public List<ProjectDetailResponse> findProjectsById(@PathVariable long id) {
-    return projectService.getProjectsByUserId(id);
+  public ResponseEntity<List<ProjectDetailResponse>> findProjectsById(@PathVariable Long id) {
+    return ResponseEntity.status(HttpStatus.OK).body(projectService.getProjectsByUserId(id));
   }
 
   @GetMapping("/{id}/applications")
-  public List<Application> findApplicationsById(@PathVariable long id) {
-    return applicationService.getApplicationsByUserId(id);
+  public ResponseEntity<List<Application>> findApplicationsById(@PathVariable Long id) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(applicationService.getApplicationsByUserId(id));
   }
 }
