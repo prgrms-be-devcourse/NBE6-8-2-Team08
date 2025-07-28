@@ -6,7 +6,6 @@ import com.devmatch.backend.domain.project.entity.Project;
 import com.devmatch.backend.domain.project.entity.ProjectStatus;
 import com.devmatch.backend.domain.project.mapper.ProjectMapper;
 import com.devmatch.backend.domain.project.repository.ProjectRepository;
-import com.devmatch.backend.domain.user.entity.User;
 import com.devmatch.backend.domain.user.service.UserService;
 import com.devmatch.backend.exception.SameStatusException;
 import java.util.Arrays;
@@ -31,19 +30,16 @@ public class ProjectService {
       throw new IllegalArgumentException("기술 스택 기재 형식이 올바르지 않습니다. \", \"로 구분해주세요");
     }
 
-    User creator = userService.getUser(projectCreateRequest.userId());
-
     Project project = new Project(
         projectCreateRequest.title(),
         projectCreateRequest.description(),
         projectCreateRequest.techStack(),
         projectCreateRequest.teamSize(),
+        userService.getUser(projectCreateRequest.userId()),
         projectCreateRequest.durationWeeks()
     );
 
-    creator.addProject(project);
-
-    return ProjectMapper.toProjectDetailResponse(project);
+    return ProjectMapper.toProjectDetailResponse(projectRepository.save(project));
   }
 
   @Transactional(readOnly = true)
@@ -87,20 +83,20 @@ public class ProjectService {
   }
 
   @Transactional
-  public ProjectDetailResponse modifyContent(Long id, String content) {
-    Project project = getProject(id);
+  public ProjectDetailResponse modifyContent(Long projectId, String content) {
+    Project project = getProject(projectId);
     project.changeContent(content);
 
     return ProjectMapper.toProjectDetailResponse(project);
   }
 
   @Transactional
-  public void deleteProject(Long id) {
-    getProject(id);
-    projectRepository.deleteById(id);
+  public void deleteProject(Long projectId) {
+    getProject(projectId);
+    projectRepository.deleteById(projectId);
   }
 
-  private Project getProject(Long projectId) {
+  public Project getProject(Long projectId) {
     return projectRepository.findById(projectId)
         .orElseThrow(() -> new NoSuchElementException("조회하려는 프로젝트가 없습니다"));
   }
