@@ -63,8 +63,26 @@ public class AnalysisService {
     String aiResponse = chatModel.call(prompt.toString());
 
     String[] parts = aiResponse.split("\\|");
-    BigDecimal score = new BigDecimal(parts[0].trim());
+
+    if (parts.length < 2) {
+      throw new IllegalArgumentException("AI 응답 형식이 올바르지 않습니다. 응답: " + aiResponse);
+    }
+
+    BigDecimal score;
+    try {
+      score = new BigDecimal(parts[0].trim());
+
+      if (score.compareTo(BigDecimal.ZERO) < 0 || score.compareTo(new BigDecimal("100")) > 0) {
+        throw new IllegalArgumentException("점수는 0에서 100 사이여야 합니다. 받은 점수: " + score);
+      }
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("점수 형식이 올바르지 않습니다. 응답: " + parts[0].trim(), e);
+    }
+
     String reason = parts[1].trim();
+    if (reason.isEmpty()) {
+      throw new IllegalArgumentException("이유가 비어있습니다. 응답: " + aiResponse);
+    }
 
     AnalysisResult result = AnalysisResult.builder()
         .application(application)
