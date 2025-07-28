@@ -20,6 +20,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -61,7 +62,7 @@ public class Application {
 
   // 지원자의 기술별 점수 저장
   @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<SkillScore> skillScore;
+  private List<SkillScore> skillScore = new ArrayList<>();
 
   // 하나의 지원서에 대해 하나의 '지원자-프로젝트 적합도' 분석 결과
   @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

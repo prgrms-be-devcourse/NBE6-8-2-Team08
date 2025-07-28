@@ -1,15 +1,16 @@
 package com.devmatch.backend.domain.application.service;
 
-import com.devmatch.backend.domain.application.dto.request.ApplicationCreateRequestDto;
 import com.devmatch.backend.domain.application.dto.request.ApplicationStatusUpdateRequestDto;
 import com.devmatch.backend.domain.application.dto.response.ApplicationDetailResponseDto;
 import com.devmatch.backend.domain.application.entity.Application;
+import com.devmatch.backend.domain.application.entity.SkillScore;
 import com.devmatch.backend.domain.application.repository.ApplicationRepository;
+import com.devmatch.backend.domain.project.dto.ProjectApplyRequest;
 import com.devmatch.backend.domain.project.entity.Project;
-import com.devmatch.backend.domain.project.repository.ProjectRepository;
 import com.devmatch.backend.domain.project.service.ProjectService;
 import com.devmatch.backend.domain.user.entity.User;
 import com.devmatch.backend.domain.user.service.UserService;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -22,20 +23,36 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApplicationService {
 
   private final ApplicationRepository applicationRepository;
-  private final ProjectRepository projectRepository;
   private final UserService userService;
   private final ProjectService projectService;
 
   // 지원서 작성 로직
   @Transactional
-  public ApplicationDetailResponseDto createApplication(ApplicationCreateRequestDto reqBody) {
-    User user = userService.getUser(reqBody.userId());
-    Project project = projectService.getProject(reqBody.projectId());
+  public ApplicationDetailResponseDto createApplication(Long id, ProjectApplyRequest projectApplyRequest) {
+    User user = userService.getUser(projectApplyRequest.userId());
+    Project project = projectService.getProject(id);
 
     Application application = Application.builder()
         .user(user)
         .project(project)
         .build();
+
+    List<SkillScore> skillScores = new ArrayList<>();
+
+    List<String> techStacks = projectApplyRequest.techStacks();
+    List<Integer> techScores = projectApplyRequest.techScores();
+
+    for (int i = 0; i < techStacks.size(); i++) {
+      SkillScore score = SkillScore.builder()
+          .application(application)
+          .techName(techStacks.get(i))
+          .score(techScores.get(i))
+          .build();
+
+      skillScores.add(score);
+    }
+
+    application.getSkillScore().addAll(skillScores);
 
     return new ApplicationDetailResponseDto(applicationRepository.save(application));
   }
