@@ -43,22 +43,19 @@ public class Project {
       String description,
       String techStack,
       Integer teamSize,
+      User creator,
       Integer durationWeeks
   ) {
     this.title = title;
     this.description = description;
     this.techStack = techStack;
     this.teamSize = teamSize;
-    this.creator = null;
+    this.creator = creator;
     this.status = ProjectStatus.RECRUITING;
     this.currentTeamSize = 0;
     this.content = "";
     this.durationWeeks = durationWeeks;
     this.createdAt = LocalDateTime.now();
-  }
-
-  public void setUser(User user) {
-    this.creator = user;
   }
 
   public void changeStatus(ProjectStatus newStatus) {
