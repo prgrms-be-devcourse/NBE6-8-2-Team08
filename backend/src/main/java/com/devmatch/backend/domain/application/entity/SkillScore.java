@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -36,4 +37,11 @@ public class SkillScore {
   // 기술 숙련도 점수(1점 = 초급 ~ 10점 = 전문가)
   @Column(name = "skillScore_score", nullable = false)
   private int score;
+
+  @Builder
+  public SkillScore(Application application, String techName, int score) {
+    this.application = application;
+    this.techName = techName;
+    this.score = score;
+  }
 }
