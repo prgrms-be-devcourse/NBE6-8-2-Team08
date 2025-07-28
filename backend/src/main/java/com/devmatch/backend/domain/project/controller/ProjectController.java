@@ -3,6 +3,7 @@ package com.devmatch.backend.domain.project.controller;
 import static org.springframework.http.HttpStatus.CREATED;
 
 import com.devmatch.backend.domain.application.dto.response.ApplicationDetailResponseDto;
+import com.devmatch.backend.domain.application.service.ApplicationService;
 import com.devmatch.backend.domain.project.dto.*;
 import com.devmatch.backend.domain.project.service.ProjectService;
 import com.devmatch.backend.global.ApiResponse;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class ProjectController {
 
   private final ProjectService projectService;
+  private final ApplicationService applicationService;
 
   @PostMapping
   public ResponseEntity<ApiResponse<ProjectDetailResponse>> create(
@@ -69,7 +71,8 @@ public class ProjectController {
   public ResponseEntity<ApiResponse<List<ApplicationDetailResponseDto>>> getApplications(
       @PathVariable Long id
   ) {
-    return ResponseEntity.noContent().build();
+    return ResponseEntity.ok()
+        .body(new ApiResponse<>("프로젝트의 지원서 전체 목록 조회 성공", applicationService.getApplications(id)));
   }
 
   @PostMapping("/{id}/applications")
