@@ -217,9 +217,9 @@ export default function ProjectDetailPage() {
   // 로딩 상태
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" role="status" aria-label="프로젝트 정보 로딩 중">
         <div className="text-center">
-          <Loader2 className="w-16 h-16 animate-spin mx-auto mb-4 text-primary" />
+          <Loader2 className="w-16 h-16 animate-spin mx-auto mb-4 text-primary" aria-hidden="true" />
           <p className="text-muted-foreground">프로젝트 정보를 불러오는 중...</p>
         </div>
       </div>
@@ -229,15 +229,15 @@ export default function ProjectDetailPage() {
   // 에러 상태
   if (error || !project) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" role="alert" aria-live="assertive">
         <div className="text-center">
           <div className="mx-auto w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
             <div className="text-red-500 text-4xl">⚠️</div>
           </div>
-          <h2 className="text-2xl font-bold mb-4 text-red-600">
+          <h2 className="text-2xl font-bold mb-4 text-red-600" id="error-title">
             {error ? '프로젝트 로드 실패' : '프로젝트를 찾을 수 없습니다'}
           </h2>
-          <p className="text-muted-foreground mb-6">
+          <p className="text-muted-foreground mb-6" id="error-description">
             {error || '잘못된 프로젝트 ID이거나 삭제된 프로젝트입니다.'}
           </p>
           <Button asChild>
@@ -258,7 +258,7 @@ export default function ProjectDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Button variant="ghost" asChild>
-              <Link href="/">
+              <Link href="/" aria-label="프로젝트 목록으로 돌아가기">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 프로젝트 목록
               </Link>
@@ -427,21 +427,23 @@ export default function ProjectDetailPage() {
                       <p className="text-sm text-muted-foreground">
                         프로젝트에 지원하려면 로그인이 필요합니다
                       </p>
-                      <Button variant="outline" className="w-full" asChild>
-                        <Link href="/">
-                          로그인하러 가기
-                        </Link>
-                      </Button>
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link href="/" aria-label="로그인 페이지로 이동">
+                      로그인하러 가기
+                    </Link>
+                  </Button>
                     </div>
                   ) : (
-                    <Button
-                      onClick={() => setShowApplicationModal(true)}
-                      className="w-full"
-                      size="lg"
-                    >
-                      <Target className="mr-2 h-4 w-4" />
-                      프로젝트 지원하기
-                    </Button>
+            <Button
+              onClick={() => setShowApplicationModal(true)}
+              className="w-full"
+              size="lg"
+              aria-haspopup="dialog"
+              aria-expanded={showApplicationModal}
+            >
+              <Target className="mr-2 h-4 w-4" />
+              프로젝트 지원하기
+            </Button>
                   )}
                 </CardContent>
               </Card>
@@ -493,10 +495,10 @@ export default function ProjectDetailPage() {
       {/* 🎯 지원하기 모달 (기술스택별 점수 입력) */}
       {/* ============================================ */}
       {showApplicationModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="application-modal-title">
           <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2" id="application-modal-title">
                 <Target className="h-5 w-5" />
                 {project.title} 프로젝트 지원하기
               </CardTitle>

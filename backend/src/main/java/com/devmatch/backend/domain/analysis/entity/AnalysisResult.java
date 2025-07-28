@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,7 +32,7 @@ public class AnalysisResult {
   private Application application;
 
   @Column(name = "compatibility_score", precision = 5, scale = 2, nullable = false)
-  private double compatibilityScore;
+  private BigDecimal compatibilityScore;
 
   @Column(columnDefinition = "TEXT", nullable = false)
   private String compatibilityReason;
