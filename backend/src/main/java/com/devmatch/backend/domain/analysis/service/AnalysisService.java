@@ -116,7 +116,7 @@ public class AnalysisService {
     prompt.append("팀 규모: ").append(project.getTeamSize()).append("명\n");
 
     for (Application application : approvedApplications) {
-      prompt.append("지원자: ").append(application.getUser().getName()).append("\n");
+      prompt.append("지원자: ").append(application.getUser().getNickName()).append("\n");
 
       for (SkillScore skill : application.getSkillScore()) {
         prompt.append("- ").append(skill.getTechName())
