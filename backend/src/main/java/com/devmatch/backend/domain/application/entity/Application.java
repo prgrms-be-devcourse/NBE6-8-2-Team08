@@ -42,7 +42,7 @@ public class Application {
   private Long id;
 
   // 이 지원서를 작성한 지원자의 고유 식별자
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "user_id")
   private User user;
 

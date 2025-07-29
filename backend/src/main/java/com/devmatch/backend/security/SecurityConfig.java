@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
 
@@ -28,10 +29,11 @@ public class SecurityConfig {
                     frameOptions ->
                         frameOptions.sameOrigin()
                 )
-        ).csrf(
-            (csrf) -> csrf
-                .ignoringRequestMatchers("/h2-console/**")
-        );
+        ).csrf(AbstractHttpConfigurer::disable);
+//        .csrf(
+//            (csrf) -> csrf
+//                .ignoringRequestMatchers("/h2-console/**")
+//        );
 
     return http.build();
   }

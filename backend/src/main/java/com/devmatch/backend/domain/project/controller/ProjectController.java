@@ -72,7 +72,7 @@ public class ProjectController {
       @PathVariable Long id
   ) {
     return ResponseEntity.ok().body(new ApiResponse<>("프로젝트의 지원서 전체 목록 조회 성공",
-        applicationService.getProjectApplications(id)));
+        applicationService.getApplicationsByProjectId(id)));
   }
 
   @PostMapping("/{id}/applications")
