@@ -35,9 +35,4 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiResponse<Void>> handle(NoSuchElementException ex) {
     return ResponseEntity.status(NOT_FOUND).body(new ApiResponse<>(ex.getMessage()));
   }
-
-  @ExceptionHandler(SameStatusException.class)
-  public ResponseEntity<ApiResponse<Void>> handle(SameStatusException ex) {
-    return ResponseEntity.badRequest().body(new ApiResponse<>(ex.getMessage()));
-  }
 }
