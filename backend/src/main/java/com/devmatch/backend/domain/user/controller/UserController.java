@@ -1,6 +1,6 @@
 package com.devmatch.backend.domain.user.controller;
 
-import com.devmatch.backend.domain.application.entity.Application;
+import com.devmatch.backend.domain.application.dto.response.ApplicationDetailResponseDto;
 import com.devmatch.backend.domain.application.service.ApplicationService;
 import com.devmatch.backend.domain.project.dto.ProjectDetailResponse;
 import com.devmatch.backend.domain.project.service.ProjectService;
@@ -41,7 +41,7 @@ public class UserController {
   }
 
   @GetMapping("/{id}/applications")
-  public ResponseEntity<List<Application>> findApplicationsById(@PathVariable Long id) {
+  public ResponseEntity<List<ApplicationDetailResponseDto>> findApplicationsById(@PathVariable Long id) {
     return ResponseEntity.status(HttpStatus.OK)
         .body(applicationService.getApplicationsByUserId(id));
   }

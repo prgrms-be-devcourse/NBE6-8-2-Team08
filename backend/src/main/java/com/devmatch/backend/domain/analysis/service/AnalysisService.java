@@ -36,10 +36,7 @@ public class AnalysisService {
 
   @Transactional
   public AnalysisResult createAnalysisResult(Long applicationId) {
-    Application application = applicationService.findById(applicationId)
-        .orElseThrow(() -> new NoSuchElementException(
-            "지원서 " + applicationId + "를 찾을 수 없습니다."
-        ));
+    Application application = applicationService.getApplicationByApplicationId(applicationId);
 
     Project project = application.getProject();
     List<SkillScore> userSkills = application.getSkillScore();
@@ -90,7 +87,7 @@ public class AnalysisService {
         .compatibilityReason(reason)
         .build();
 
-    applicationService.saveAnalysisResult(result);
+    applicationService.saveAnalysisResult(result.getApplication().getId(), result);
 
     return analysisRepository.save(result);
   }

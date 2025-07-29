@@ -42,7 +42,7 @@ public class ApplicationController {
         .body(
             new ApiResponse<>(
                 "%s 번 지원서의 상세 정보 조회를 성공했습니다."
-                    .formatted(applicationDetailResponseDto.id()),
+                    .formatted(applicationDetailResponseDto.applicationId()),
                 applicationDetailResponseDto
             )
         );
