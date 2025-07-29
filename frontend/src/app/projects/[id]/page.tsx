@@ -28,8 +28,8 @@ import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { getProject, ProjectDetailResponse } from '@/lib/api/project';
-import { createApplication, ApplicationCreateRequest } from '@/lib/api/application';
+import { getProject, ProjectDetailResponse, applyToProject } from '@/lib/api/project';
+import { ProjectApplyRequest } from '@/types';
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -128,19 +128,18 @@ const ProjectDetailPage: React.FC = () => {
     
     try {
       // 기술 스택별 점수를 배열로 변환
-      const skillScores = Object.entries(techScores).map(([techName, score]) => ({
-        techName,
-        score
-      }));
+      const techStacks = Object.keys(techScores);
+      const techScores_array = Object.values(techScores);
       
-      // 지원서 생성 요청 데이터
-      const applicationData: ApplicationCreateRequest = {
-        projectId: project.id,
-        skillScores
+      // 프로젝트 지원 요청 데이터
+      const applicationData: ProjectApplyRequest = {
+        userId: user.id,
+        techStacks,
+        techScores: techScores_array
       };
       
-      // 지원서 생성 API 호출
-      await createApplication(applicationData);
+      // 프로젝트 지원 API 호출
+      await applyToProject(project.id, applicationData);
       
       // 지원 상태 업데이트
       setHasApplied(true);

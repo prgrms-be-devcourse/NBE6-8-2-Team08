@@ -1,9 +1,12 @@
 package com.devmatch.backend.domain.project.entity;
 
+import static jakarta.persistence.FetchType.LAZY;
+
+import com.devmatch.backend.domain.application.entity.Application;
 import com.devmatch.backend.domain.user.entity.User;
-import com.devmatch.backend.exception.SameStatusException;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -38,6 +41,9 @@ public class Project {
   private Integer durationWeeks;
   private LocalDateTime createdAt;
 
+  @OneToMany(mappedBy = "project", fetch = LAZY, orphanRemoval = true)
+  private List<Application> applications;
+
   public Project(
       String title,
       String description,
@@ -60,7 +66,7 @@ public class Project {
 
   public void changeStatus(ProjectStatus newStatus) {
     if (newStatus == this.status) {
-      throw new SameStatusException(
+      throw new IllegalArgumentException(
           "현재 상태(%s)와 동일한 상태(%s)로 변경할 수 없습니다".formatted(this.status, newStatus));
     }
 
