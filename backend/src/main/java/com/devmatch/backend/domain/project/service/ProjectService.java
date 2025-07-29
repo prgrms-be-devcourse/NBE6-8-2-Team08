@@ -51,7 +51,7 @@ public class ProjectService {
   }
 
   @Transactional(readOnly = true)
-  public List<ProjectDetailResponse> getProjectsByUserId(long userId) {
+  public List<ProjectDetailResponse> getProjectsByUserId(Long userId) {
     return projectRepository.findAllByCreatorId(userId)
         .stream()
         .map(ProjectMapper::toProjectDetailResponse)
