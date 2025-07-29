@@ -1,18 +1,54 @@
 // 🔗 API 통합 export
-export { projectApi } from './project';
-export { userApi } from './user';
+// 각 도메인별 API 함수들을 개별적으로 export하여 사용
+
+// 프로젝트 관련 API
+export {
+  createProject,
+  getAllProjects,
+  getProject,
+  updateProjectStatus,
+  updateProjectContent,
+  deleteProject,
+  getProjectApplications,
+  applyToProject
+} from './project';
+
+// 사용자 관련 API
+export {
+  registerUser,
+  getUserProjects,
+  getUserApplications
+} from './user';
+
+// 인증 관련 API
 export { authApi } from './auth';
-export { applicationApi } from './application';
-export { analysisApi } from './analysis';
+
+// 지원서 관련 API
+export {
+  getApplicationDetail,
+  deleteApplication,
+  updateApplicationStatus,
+  createApplication
+} from './application';
+
+// 분석 관련 API
+export {
+  getAnalysisResult,
+  createAnalysisResult,
+  createTeamRoleAssignment
+} from './analysis';
 
 // 🔧 UTILITY FUNCTIONS
 // 에러 처리 유틸리티
-export const handleApiError = (error: any) => {
+export const handleApiError = (error: unknown) => {
   console.error('API 에러:', error);
   
   // 백엔드 GlobalExceptionHandler에서 반환하는 에러 형식에 맞춰 처리
-  if (error.response?.data?.message) {
-    return error.response.data.message;
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const apiError = error as { response?: { data?: { message?: string } } };
+    if (apiError.response?.data?.message) {
+      return apiError.response.data.message;
+    }
   }
   
   return '서버 오류가 발생했습니다.';
