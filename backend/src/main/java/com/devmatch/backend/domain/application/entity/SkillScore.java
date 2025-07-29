@@ -22,7 +22,7 @@ public class SkillScore {
   // 각 기술점수 기록을 구분하는 유일한 번호
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "skill_score_id")
+  @Column(name = "id")
   private Long id;
 
   // 이 기술점수가 속한 지원서의 고유 식별자
@@ -31,11 +31,11 @@ public class SkillScore {
   private Application application;
 
   // 평가한 기술 명
-  @Column(name = "skill_score_techName", nullable = false)
+  @Column(name = "tech_name", nullable = false)
   private String techName;
 
   // 기술 숙련도 점수(1점 = 초급 ~ 10점 = 전문가)
-  @Column(name = "skill_score_score", nullable = false)
+  @Column(name = "score", nullable = false)
   private int score;
 
   @Builder

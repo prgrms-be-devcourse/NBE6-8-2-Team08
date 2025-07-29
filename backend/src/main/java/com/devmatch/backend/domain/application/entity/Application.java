@@ -38,7 +38,7 @@ public class Application {
   // 각 지원서를 구분하는 유일한 번호
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "application_id")
+  @Column(name = "id")
   private Long id;
 
   // 이 지원서를 작성한 지원자의 고유 식별자
@@ -52,7 +52,7 @@ public class Application {
   private Project project;
 
   // 지원서의 승인 상태
-  @Column(name = "application_status", nullable = false)
+  @Column(name = "status", nullable = false)
   @Enumerated(EnumType.STRING)
   private ApplicationStatus status = ApplicationStatus.PENDING;
 
