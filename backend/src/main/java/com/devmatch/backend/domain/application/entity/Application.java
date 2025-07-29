@@ -76,6 +76,10 @@ public class Application {
   }
 
   public void changeStatus(ApplicationStatus status) {
+    if (status == this.status) {
+      throw new IllegalArgumentException(
+          "현재 상태(%s)와 동일한 상태(%s)로 변경할 수 없습니다".formatted(this.status, status));
+    }
     this.status = status;
   }
 }
