@@ -71,8 +71,8 @@ public class ProjectController {
   public ResponseEntity<ApiResponse<List<ApplicationDetailResponseDto>>> getApplications(
       @PathVariable Long id
   ) {
-    return ResponseEntity.ok()
-        .body(new ApiResponse<>("프로젝트의 지원서 전체 목록 조회 성공", applicationService.getApplications(id)));
+    return ResponseEntity.ok().body(new ApiResponse<>("프로젝트의 지원서 전체 목록 조회 성공",
+        applicationService.getProjectApplications(id)));
   }
 
   @PostMapping("/{id}/applications")
