@@ -42,7 +42,7 @@ export interface LoginResponse {
 export interface AnalysisResult {
   id: number;
   applicationId: number;
-  compatibilityScore: number;
+  compatibilityScore: string;
   compatibilityReason: string;
 }
 
@@ -64,10 +64,11 @@ export interface ApplicationStatusUpdateRequest {
   status: string;
 }
 
-// 지원서 생성 요청 타입 (application.ts에서 필요)
-export interface ApplicationCreateRequest {
-  projectId: number;
-  // 기술 스택별 점수 등 추가 필드 정의 가능
+// 프로젝트 지원 요청 타입 (project.ts에서 필요)
+export interface ProjectApplyRequest {
+  userId: number;
+  techStacks: string[];
+  techScores: number[];
 }
 
 // ============================================

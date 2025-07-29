@@ -1,7 +1,8 @@
 package com.devmatch.backend.domain.project.dto;
 
-import jakarta.validation.constraints.Size;
+import com.devmatch.backend.domain.project.entity.ProjectStatus;
+import jakarta.validation.constraints.NotNull;
 
-public record ProjectStatusUpdateRequest(@Size(min = 1, max = 20) String status) {
+public record ProjectStatusUpdateRequest(@NotNull ProjectStatus status) {
 
 }
