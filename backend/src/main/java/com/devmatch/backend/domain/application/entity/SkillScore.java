@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-@Table(name = "skillScores")
+@Table(name = "skill_scores")
 public class SkillScore {
 
   // 각 기술점수 기록을 구분하는 유일한 번호
