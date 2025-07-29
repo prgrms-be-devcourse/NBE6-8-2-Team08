@@ -23,7 +23,7 @@ public class ProjectService {
 
   @Transactional
   public ProjectDetailResponse createProject(ProjectCreateRequest projectCreateRequest) {
-    if (!projectCreateRequest.techStack().matches("^([\\w.+#-]+)(, [\\w.+#-]+)*$")) {
+    if (!projectCreateRequest.techStack().matches("^([\\w .+#-]+)(, [\\w .+#-]+)*$")) {
       throw new IllegalArgumentException("기술 스택 기재 형식이 올바르지 않습니다. \", \"로 구분해주세요");
     }
 
