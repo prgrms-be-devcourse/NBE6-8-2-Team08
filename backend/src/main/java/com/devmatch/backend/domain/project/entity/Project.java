@@ -1,9 +1,13 @@
 package com.devmatch.backend.domain.project.entity;
 
+import static jakarta.persistence.FetchType.LAZY;
+
+import com.devmatch.backend.domain.application.entity.Application;
 import com.devmatch.backend.domain.user.entity.User;
 import com.devmatch.backend.exception.SameStatusException;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -37,6 +41,9 @@ public class Project {
   private String content;
   private Integer durationWeeks;
   private LocalDateTime createdAt;
+
+  @OneToMany(mappedBy = "project", fetch = LAZY, orphanRemoval = true)
+  private List<Application> applications;
 
   public Project(
       String title,
