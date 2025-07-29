@@ -44,12 +44,8 @@ interface ProjectContentUpdateRequest {
   content: string; // @Size(min = 1, max = 2000) String content
 }
 
-// 백엔드 ProjectApplyRequest.java 기반
-interface ProjectApplyRequest {
-  userId: number;        // @Min(1) Long userId
-  techStacks: string[];  // List<String> techStacks (지원서에서는 배열로 전송)
-  techScores: number[];  // List<Integer> techScores
-}
+// 백엔드 ProjectApplyRequest.java 기반 (types/index.ts에서 import)
+import { ProjectApplyRequest } from '@/types';
 
 // 백엔드 ApiResponse.java 기반 공통 응답 타입
 interface ApiResponse<T> {

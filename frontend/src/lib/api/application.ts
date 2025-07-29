@@ -47,15 +47,12 @@ export interface ApplicationStatusUpdateRequest {
  * 백엔드 파일: ApplicationCreateRequestDto.java
  * 
  * 백엔드 요청 구조:
+ * - userId: Long
  * - projectId: Long
- * - skillScores: List<SkillScoreRequest> (기술 스택별 점수)
  */
 export interface ApplicationCreateRequest {
+  userId: number;
   projectId: number;
-  skillScores: Array<{
-    techName: string;
-    score: number;
-  }>;
 }
 
 /**
