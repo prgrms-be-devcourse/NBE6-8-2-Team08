@@ -1,5 +1,7 @@
 "use client";
 
+"use client";
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -18,7 +20,8 @@ import {
   Zap,
   Code,
   Database,
-  Smartphone
+  Smartphone,
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,17 +50,20 @@ interface ProjectDetail extends ProjectDetailResponse {
   urgency?: 'low' | 'medium' | 'high';
   applications?: number;
   matchedDevelopers?: Developer[];
+  budget?: string;
+  location?: string;
 }
 
 const ProjectDetailPage: React.FC = () => {
   const params = useParams();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [techScores, setTechScores] = useState<Record<string, number>>({});
+  const [isApplying, setIsApplying] = useState(false);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -126,6 +132,14 @@ const ProjectDetailPage: React.FC = () => {
   const handleApply = async () => {
     if (!project || !user) return;
     
+    // 유효성 검사
+    if (Object.keys(techScores).length === 0) {
+      alert('기술 스택 점수를 입력해주세요.');
+      return;
+    }
+    
+    setIsApplying(true);
+    
     try {
       // 기술 스택별 점수를 배열로 변환
       const techStacks = Object.keys(techScores);
@@ -148,13 +162,15 @@ const ProjectDetailPage: React.FC = () => {
     } catch (err) {
       console.error('지원서 제출 실패:', err);
       alert('지원서 제출에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsApplying(false);
     }
   };
 
   const handleTechScoreChange = (tech: string, score: number) => {
     setTechScores(prev => ({
       ...prev,
-      [tech]: score
+      [tech]: Math.max(1, Math.min(10, score)) // 1-10 사이의 값으로 제한
     }));
   };
 
@@ -298,9 +314,20 @@ const ProjectDetailPage: React.FC = () => {
                         : 'bg-blue-500 hover:bg-blue-600'
                     } text-white`}
                     onClick={handleApply}
-                    disabled={hasApplied || !user}
+                    disabled={hasApplied || !user || isApplying}
                   >
-                    {hasApplied ? 'Applied ✓' : user ? 'Apply Now' : 'Login to Apply'}
+                    {isApplying ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        지원 중...
+                      </>
+                    ) : hasApplied ? (
+                      '지원 완료 ✓'
+                    ) : user ? (
+                      '프로젝트 지원하기'
+                    ) : (
+                      '로그인 후 지원하기'
+                    )}
                   </Button>
                   <Button 
                     variant="outline"
@@ -326,7 +353,7 @@ const ProjectDetailPage: React.FC = () => {
               transition={{ delay: 0.2 }}
             >
               <Card className="p-8 bg-white/80 backdrop-blur-sm">
-                <h2 className="text-2xl font-black mb-4 text-foreground">Project Description</h2>
+                <h2 className="text-2xl font-black mb-4 text-foreground">프로젝트 설명</h2>
                 <p className="text-muted-foreground leading-relaxed text-lg">
                   {project.description}
                 </p>
@@ -349,7 +376,7 @@ const ProjectDetailPage: React.FC = () => {
               transition={{ delay: 0.3 }}
             >
               <Card className="p-8 bg-white/80 backdrop-blur-sm">
-                <h2 className="text-2xl font-black mb-6 text-foreground">Requirements</h2>
+                <h2 className="text-2xl font-black mb-6 text-foreground">요구사항</h2>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
@@ -375,25 +402,61 @@ const ProjectDetailPage: React.FC = () => {
               </Card>
             </motion.div>
 
-            {/* Tech Stack */}
+            {/* Tech Stack with Scores */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
             >
               <Card className="p-8 bg-white/80 backdrop-blur-sm">
-                <h2 className="text-2xl font-black mb-6 text-foreground">Tech Stack</h2>
-                <div className="flex flex-wrap gap-3">
-                  {project.techStacks.map((tech, index) => (
-                    <Badge 
-                      key={index}
-                      className="bg-purple-500 text-white text-sm py-2 px-4"
-                    >
-                      <Code className="w-3 h-3 mr-1" />
-                      {tech}
-                    </Badge>
-                  ))}
-                </div>
+                <h2 className="text-2xl font-black mb-6 text-foreground">기술 스택 점수</h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  각 기술 스택에 대한 자신있는 점수를 입력해주세요 (1-10점)
+                </p>
+                
+                {project.techStacks.length > 0 ? (
+                  <div className="space-y-4">
+                    {project.techStacks.map((tech, index) => (
+                      <div key={index} className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 w-40">
+                          <Code className="w-4 h-4 text-purple-500" />
+                          <span className="font-medium">{tech}</span>
+                        </div>
+                        <div className="flex-1">
+                          <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            value={techScores[tech] || 5}
+                            onChange={(e) => handleTechScoreChange(tech, parseInt(e.target.value))}
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                            disabled={!user || hasApplied}
+                          />
+                        </div>
+                        <div className="w-10 text-center">
+                          <span className="font-bold text-lg">{techScores[tech] || 5}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Code className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">등록된 기술 스택이 없습니다.</p>
+                  </div>
+                )}
+                
+                {!user && (
+                  <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-yellow-800">로그인이 필요합니다</p>
+                      <p className="text-sm text-yellow-700">
+                        프로젝트에 지원하려면 먼저 로그인해주세요.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </Card>
             </motion.div>
           </div>
@@ -407,7 +470,7 @@ const ProjectDetailPage: React.FC = () => {
               transition={{ delay: 0.2 }}
             >
               <Card className="p-6 bg-white/80 backdrop-blur-sm">
-                <h3 className="text-xl font-black mb-4 text-foreground">Client</h3>
+                <h3 className="text-xl font-black mb-4 text-foreground">클라이언트</h3>
                 <div className="flex items-center gap-4 mb-4">
                   <Avatar className="w-16 h-16 border-2 border-black">
                     <AvatarImage src="/api/placeholder/60/60" alt={project.creator} />
@@ -441,25 +504,25 @@ const ProjectDetailPage: React.FC = () => {
               transition={{ delay: 0.3 }}
             >
               <Card className="p-6 bg-white/80 backdrop-blur-sm">
-                <h3 className="text-xl font-black mb-4 text-foreground">Project Stats</h3>
+                <h3 className="text-xl font-black mb-4 text-foreground">프로젝트 통계</h3>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Applications</span>
+                    <span className="text-sm text-muted-foreground">지원자 수</span>
                     <span className="font-bold">{project.applications}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Team Size</span>
-                    <span className="font-bold">{project.currentTeamSize || 0} / {project.teamSize} developers</span>
+                    <span className="text-sm text-muted-foreground">팀 구성</span>
+                    <span className="font-bold">{project.currentTeamSize || 0} / {project.teamSize} 명</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Category</span>
+                    <span className="text-sm text-muted-foreground">카테고리</span>
                     <Badge className="bg-cyan-500 text-white">
                       Mobile Development
                     </Badge>
                   </div>
                   <div className="pt-2">
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-muted-foreground">Team Progress</span>
+                      <span className="text-muted-foreground">진행률</span>
                       <span className="font-bold">0%</span>
                     </div>
                     <Progress value={0} className="h-2" />
@@ -475,7 +538,7 @@ const ProjectDetailPage: React.FC = () => {
               transition={{ delay: 0.4 }}
             >
               <Card className="p-6 bg-white/80 backdrop-blur-sm">
-                <h3 className="text-xl font-black mb-4 text-foreground">Matched Developers</h3>
+                <h3 className="text-xl font-black mb-4 text-foreground">추천 개발자</h3>
                 <div className="space-y-4">
                   {project.matchedDevelopers && project.matchedDevelopers.map((dev) => (
                     <div key={dev.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border-2 border-gray-200">

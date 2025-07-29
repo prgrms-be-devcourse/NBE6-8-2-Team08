@@ -34,6 +34,12 @@ export interface LoginResponse {
   user: User;
 }
 
+// 사용자 등록 DTO (user.ts에서 필요)
+export interface UserRegisterDto {
+  id: number;
+  name: string;
+}
+
 // ============================================
 // 🤖 분석 관련 공통 타입  
 // ============================================
@@ -42,7 +48,15 @@ export interface LoginResponse {
 export interface AnalysisResult {
   id: number;
   applicationId: number;
-  compatibilityScore: string;
+  compatibilityScore: number; // string에서 number로 변경
+  compatibilityReason: string;
+}
+
+// 분석 결과 응답 타입 (analysis.ts에서 필요)
+export interface AnalysisResultResponse {
+  id: number;
+  applicationId: number;
+  compatibilityScore: number;
   compatibilityReason: string;
 }
 
@@ -59,9 +73,60 @@ export interface ApplicationEntity {
   appliedAt: string;
 }
 
+// 지원서 상세 응답 DTO (application.ts에서 필요)
+export interface ApplicationDetailResponse {
+  id: number;
+  user: {
+    id: number;
+    name: string;
+  };
+  status: string;
+  appliedAt: string;
+}
+
 // 지원서 상태 업데이트 요청 타입 (application.ts에서 필요)
 export interface ApplicationStatusUpdateRequest {
   status: string;
+}
+
+// 지원서 생성 요청 타입 (application.ts에서 필요)
+export interface ApplicationCreateRequest {
+  userId: number;
+  projectId: number;
+}
+
+// 프로젝트 생성 요청 타입 (project.ts에서 필요)
+export interface ProjectCreateRequest {
+  userId: number;
+  title: string;
+  description: string;
+  techStack: string; // 쉼표로 구분된 문자열
+  teamSize: number;
+  durationWeeks: number;
+}
+
+// 프로젝트 상세 응답 타입 (project.ts에서 필요)
+export interface ProjectDetailResponse {
+  id: number;
+  title: string;
+  description: string;
+  techStacks: string[]; // 배열로 변환
+  teamSize: number;
+  currentTeamSize: number;
+  creator: string;
+  status: string;
+  content: string;
+  createdAt: string;
+}
+
+// 프로젝트 상태 업데이트 요청 타입 (project.ts에서 필요)
+export interface ProjectStatusUpdateRequest {
+  status: string;
+}
+
+// 프로젝트 내용 업데이트 요청 타입 (project.ts에서 필요)
+export interface ProjectContentUpdateRequest {
+  content: string;
 }
 
 // 프로젝트 지원 요청 타입 (project.ts에서 필요)
@@ -84,7 +149,4 @@ export type ProjectStatus = 'RECRUITING' | 'COMPLETED';
 // ============================================
 // 📝 참고사항
 // ============================================
-// - ProjectCreateRequest, ProjectDetailResponse 등은 project.ts에 정의
-// - UserRegisterDto는 user.ts에 정의
-// - ApplicationDetailResponseDto는 application.ts에 정의
 // - 각 API 파일이 백엔드 DTO와 직접 동기화되도록 구조화

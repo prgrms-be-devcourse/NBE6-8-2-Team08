@@ -10,40 +10,16 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 // 📝 백엔드 DTO 기반 타입 정의 (실제 Java 코드와 동일)
 // ============================================
 
-// 백엔드 UserRegisterDto.java 기반
-interface UserRegisterDto {
-  id: number;   // Long id
-  name: string; // String name
-}
+// 백엔드 DTO 타입들은 types/index.ts에서 가져옴
+import { 
+  UserRegisterDto, 
+  ProjectDetailResponse, 
+  ApplicationEntity,
+  ApiResponse
+} from '@/types';
 
-// 백엔드 ProjectDetailResponse.java 기반 (project.ts와 동일)
-export interface ProjectDetailResponse {
-  id: number;                // Long id
-  title: string;             // String title
-  description: string;       // String description
-  techStacks: string[];      // List<String> techStacks
-  teamSize: number;          // Integer teamSize
-  currentTeamSize: number;   // Integer currentTeamSize
-  creator: string;           // String creator
-  status: string;            // String status
-  content: string;           // String content
-  createdAt: string;         // LocalDateTime createdAt (ISO 문자열로 전송)
-}
-
-// 백엔드 Application 엔티티 기반 (types/index.ts의 ApplicationEntity와 동일)
-export interface Application {
-  id: number;        // Long id
-  userId: number;    // Long userId (User 엔티티 FK)
-  projectId: number; // Long projectId (Project 엔티티 FK)
-  status: string;    // ApplicationStatus enum -> String
-  appliedAt: string; // LocalDateTime appliedAt (ISO 문자열로 전송)
-}
-
-// 백엔드 ApiResponse.java 기반 공통 응답 타입
-interface ApiResponse<T> {
-  msg: string;  // String msg
-  data: T;      // T data
-}
+// 호환성을 위해 Application 타입 재정의
+export type Application = ApplicationEntity;
 
 // ============================================
 // 🚀 API 함수들 (백엔드 UserController 메서드와 1:1 대응)
@@ -60,12 +36,17 @@ interface ApiResponse<T> {
  * - Content-Type: application/json 헤더 필수
  */
 export const registerUser = async (name: string): Promise<UserRegisterDto> => {
-  const response = await axios.post(`${API_BASE_URL}/users/register`, name, {
-    headers: {
-      'Content-Type': 'application/json' // 백엔드 @RequestBody String 처리용
-    }
-  });
-  return response.data.data; // ApiResponse<UserRegisterDto>에서 data 추출
+  try {
+    const response = await axios.post(`${API_BASE_URL}/users/register`, name, {
+      headers: {
+        'Content-Type': 'application/json' // 백엔드 @RequestBody String 처리용
+      }
+    });
+    return response.data.data; // ApiResponse<UserRegisterDto>에서 data 추출
+  } catch (error) {
+    console.error('사용자 등록 실패:', error);
+    throw error;
+  }
 };
 
 /**
@@ -78,8 +59,13 @@ export const registerUser = async (name: string): Promise<UserRegisterDto> => {
  * - response.data로 바로 접근 (response.data.data 아님)
  */
 export const getUserProjects = async (userId: number): Promise<ProjectDetailResponse[]> => {
-  const response = await axios.get(`${API_BASE_URL}/users/${userId}/projects`);
-  return response.data; // List<ProjectDetailResponse> 직접 반환
+  try {
+    const response = await axios.get(`${API_BASE_URL}/users/${userId}/projects`);
+    return response.data; // List<ProjectDetailResponse> 직접 반환
+  } catch (error) {
+    console.error('사용자별 프로젝트 목록 조회 실패:', error);
+    throw error;
+  }
 };
 
 /**
@@ -92,60 +78,11 @@ export const getUserProjects = async (userId: number): Promise<ProjectDetailResp
  * - response.data로 바로 접근 (response.data.data 아님)
  */
 export const getUserApplications = async (userId: number): Promise<Application[]> => {
-  const response = await axios.get(`${API_BASE_URL}/users/${userId}/applications`);
-  return response.data; // List<Application> 직접 반환
-};
-
-
-// ============================================
-// 🎯 사용 예시 (프론트엔드 개발자용 가이드)
-// ============================================
-
-/*
-// React 컴포넌트에서 사용 예시:
-
-// 1. 사용자 등록
-const handleRegister = async () => {
   try {
-    const user = await registerUser("홍길동");
-    console.log("등록된 사용자:", user); // { id: 1, name: "홍길동" }
-    
-    // AuthContext에 로그인 처리
-    login(user);
+    const response = await axios.get(`${API_BASE_URL}/users/${userId}/applications`);
+    return response.data; // List<Application> 직접 반환
   } catch (error) {
-    console.error("사용자 등록 실패:", error);
+    console.error('사용자별 지원서 목록 조회 실패:', error);
+    throw error;
   }
 };
-
-// 2. 사용자별 프로젝트 목록 조회
-const fetchUserProjects = async (userId: number) => {
-  try {
-    const projects = await getUserProjects(userId);
-    console.log("사용자 프로젝트 목록:", projects);
-    setProjects(projects);
-  } catch (error) {
-    console.error("프로젝트 목록 조회 실패:", error);
-  }
-};
-
-// 3. 사용자별 지원서 목록 조회  
-const fetchUserApplications = async (userId: number) => {
-  try {
-    const applications = await getUserApplications(userId);
-    console.log("사용자 지원서 목록:", applications);
-    setApplications(applications);
-  } catch (error) {
-    console.error("지원서 목록 조회 실패:", error);
-  }
-};
-
-// 4. 사용자 정보 수정 (미구현)
-const handleUpdateUser = async (userId: number) => {
-  try {
-    // const updatedUser = await updateUser(userId, { name: "새이름" });
-    // console.log("수정된 사용자:", updatedUser);
-  } catch (error) {
-    console.error("사용자 정보 수정 실패:", error);
-  }
-};
-*/
