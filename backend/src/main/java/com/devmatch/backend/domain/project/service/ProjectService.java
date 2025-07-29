@@ -7,11 +7,8 @@ import com.devmatch.backend.domain.project.entity.ProjectStatus;
 import com.devmatch.backend.domain.project.mapper.ProjectMapper;
 import com.devmatch.backend.domain.project.repository.ProjectRepository;
 import com.devmatch.backend.domain.user.service.UserService;
-import com.devmatch.backend.exception.SameStatusException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,22 +61,11 @@ public class ProjectService {
   }
 
   @Transactional
-  public ProjectDetailResponse modifyStatus(Long projectId, String status) {
-    try {
-      Project project = getProject(projectId);
-      project.changeStatus(ProjectStatus.valueOf(status));
+  public ProjectDetailResponse modifyStatus(Long projectId, ProjectStatus status) {
+    Project project = getProject(projectId);
+    project.changeStatus(status);
 
-      return ProjectMapper.toProjectDetailResponse(project);
-    } catch (SameStatusException e) {
-      throw e;
-    } catch (IllegalArgumentException e) {
-      String validStatuses = Arrays.stream(ProjectStatus.values())
-          .map(Enum::name)
-          .collect(Collectors.joining(", "));
-
-      throw new IllegalArgumentException(
-          "%s는 유효하지 않은 상태값입니다. 유효한 상태값들은 다음과 같습니다: %s".formatted(status, validStatuses));
-    }
+    return ProjectMapper.toProjectDetailResponse(project);
   }
 
   @Transactional
