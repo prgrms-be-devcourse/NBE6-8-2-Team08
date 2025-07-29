@@ -9,21 +9,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 // ============================================
 
 // 백엔드 User 엔티티 기반 (types/index.ts에서 가져옴)
-import { User, ApiResponse } from '@/types';
-
-// 백엔드 LoginRequest.java (현재 빈 클래스)
-interface LoginRequest {
-  // TODO: 백엔드에서 실제 로그인 필드 구현 시 추가
-  // username?: string;
-  // password?: string;
-}
-
-// 백엔드 LoginResponse.java (현재 빈 클래스)  
-interface LoginResponse {
-  // TODO: 백엔드에서 실제 로그인 응답 구현 시 추가
-  // token?: string;
-  // user?: User;
-}
+import { User, LoginRequest, LoginResponse, ApiResponse } from '@/types';
 
 // ============================================
 // 🚀 API 함수들 (백엔드 AuthController 메서드와 1:1 대응)
@@ -102,7 +88,7 @@ export const authApi = {
   },
 
   /**
-   * ❌ 백엔드 미구현 - GET /auth/me (또는 /auth/session)
+   * ✅ 프론트엔드 구현완료 - GET /auth/me (또는 /auth/session)
    * 
    * 📝 필요한 이유:
    * - 페이지 새로고침 시 로그인 상태 확인용
@@ -114,47 +100,32 @@ export const authApi = {
    * 2. 현재 세션의 사용자 정보 반환
    * 3. 인증되지 않은 경우 401 Unauthorized 반환
    * 4. 응답 형태: ApiResponse<User> 또는 User 직접 반환
-   * 
-   * 예상 백엔드 구현:
-   * ```java
-   * @GetMapping("/me")
-   * public ResponseEntity<ApiResponse<User>> getCurrentUser(HttpSession session) {
-   *   User user = (User) session.getAttribute("user");
-   *   if (user == null) {
-   *     return ResponseEntity.status(401).build();
-   *   }
-   *   return ResponseEntity.ok(new ApiResponse<>("현재 사용자 조회 성공", user));
-   * }
-   * ```
    */
   getCurrentUser: async (): Promise<User | null> => {
-    throw new Error('🚧 백엔드 구현 대기중 - GET /auth/me 엔드포인트 필요');
-    
-    // 구현 예정 코드:
-    // try {
-    //   const response = await fetch(`${API_BASE_URL}/auth/me`, {
-    //     method: 'GET',
-    //     credentials: 'include',
-    //   });
-    //
-    //   if (response.status === 401) {
-    //     return null; // 인증되지 않음
-    //   }
-    //
-    //   if (!response.ok) {
-    //     throw new Error(`HTTP error! status: ${response.status}`);
-    //   }
-    //
-    //   const result: ApiResponse<User> = await response.json();
-    //   return result.data;
-    // } catch (error) {
-    //   console.error('현재 사용자 조회 실패:', error);
-    //   return null;
-    // }
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (response.status === 401) {
+        return null; // 인증되지 않음
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result: ApiResponse<User> = await response.json();
+      return result.data;
+    } catch (error) {
+      console.error('현재 사용자 조회 실패:', error);
+      return null;
+    }
   },
 
   /**
-   * ❌ 백엔드 미구현 - POST /auth/login (실제 로그인)
+   * ✅ 프론트엔드 구현완료 - POST /auth/login (실제 로그인)
    * 
    * 📝 실제 로그인 API (현재 login()과 다름)
    * 
@@ -165,29 +136,26 @@ export const authApi = {
    * 4. 응답에 사용자 정보 포함
    */
   authenticateUser: async (loginData: LoginRequest): Promise<User> => {
-    throw new Error('🚧 백엔드 구현 대기중 - 실제 로그인 로직 필요');
-    
-    // 구현 예정 코드:
-    // try {
-    //   const response = await fetch(`${API_BASE_URL}/auth/login`, {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     credentials: 'include',
-    //     body: JSON.stringify(loginData),
-    //   });
-    //
-    //   if (!response.ok) {
-    //     throw new Error('로그인 실패');
-    //   }
-    //
-    //   const result: ApiResponse<User> = await response.json();
-    //   return result.data;
-    // } catch (error) {
-    //   console.error('사용자 인증 실패:', error);
-    //   throw error;
-    // }
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(loginData),
+      });
+
+      if (!response.ok) {
+        throw new Error('로그인 실패');
+      }
+
+      const result: ApiResponse<User> = await response.json();
+      return result.data;
+    } catch (error) {
+      console.error('사용자 인증 실패:', error);
+      throw error;
+    }
   },
 };
 

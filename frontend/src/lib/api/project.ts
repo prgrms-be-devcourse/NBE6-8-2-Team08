@@ -30,6 +30,8 @@ export interface ProjectDetailResponse {
   status: string;            // String status
   content: string;           // String content
   createdAt: string;         // LocalDateTime createdAt (ISO 문자열로 전송)
+  budget?: string;           // String budget (선택적)
+  location?: string;         // String location (선택적)
 }
 
 // 백엔드 ProjectStatusUpdateRequest.java 기반
