@@ -31,7 +31,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Entity
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-@Table(name = "application")
+@Table(name = "applications")
 @EntityListeners(AuditingEntityListener.class)
 public class Application {
 
@@ -62,12 +62,12 @@ public class Application {
 
   // 지원자의 기술별 점수 저장
   @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<SkillScore> skillScore = new ArrayList<>();
+  private List<SkillScore> skill_score = new ArrayList<>();
 
   // 하나의 지원서에 대해 하나의 '지원자-프로젝트 적합도' 분석 결과
   @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  @JoinColumn(name = "analysisResult_id")
-  private AnalysisResult analysisResult;
+  @JoinColumn(name = "analysis_result_id")
+  private AnalysisResult analysis_result;
 
   @Builder
   public Application(User user, Project project) {
@@ -81,5 +81,13 @@ public class Application {
           "현재 상태(%s)와 동일한 상태(%s)로 변경할 수 없습니다".formatted(this.status, status));
     }
     this.status = status;
+  }
+
+  public void setAnalysisResult(AnalysisResult analysis_result) {
+    if (this.analysis_result != null) {
+      throw new IllegalArgumentException(
+          "현재 지원서(지원서 %s번)에 분석 결과가(분석 결과 %s번) 이미 존재합니다".formatted(this.id, analysis_result.getId()));
+    }
+    this.analysis_result = analysis_result;
   }
 }

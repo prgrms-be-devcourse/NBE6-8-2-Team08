@@ -36,13 +36,10 @@ public class AnalysisService {
 
   @Transactional
   public AnalysisResult createAnalysisResult(Long applicationId) {
-    Application application = applicationService.findById(applicationId)
-        .orElseThrow(() -> new NoSuchElementException(
-            "지원서 " + applicationId + "를 찾을 수 없습니다."
-        ));
+    Application application = applicationService.getApplicationByApplicationId(applicationId);
 
     Project project = application.getProject();
-    List<SkillScore> userSkills = application.getSkillScore();
+    List<SkillScore> userSkills = application.getSkill_score();
 
     StringBuilder prompt = new StringBuilder();
     prompt.append("당신은 전문 분석가입니다. 다음 정보를 바탕으로 지원자의 적합도를 평가해주세요.\n\n");
@@ -52,7 +49,7 @@ public class AnalysisService {
     prompt.append("지원자 기술 역량:\n");
 
     for (SkillScore skill : userSkills) {
-      prompt.append("- ").append(skill.getTechName())
+      prompt.append("- ").append(skill.getTech_name())
           .append(": ").append(skill.getScore()).append("/10점\n");
     }
 
@@ -90,7 +87,7 @@ public class AnalysisService {
         .compatibilityReason(reason)
         .build();
 
-    applicationService.saveAnalysisResult(result);
+    applicationService.saveAnalysisResult(result.getApplication().getId(), result);
 
     return analysisRepository.save(result);
   }
@@ -121,8 +118,8 @@ public class AnalysisService {
     for (Application application : approvedApplications) {
       prompt.append("지원자: ").append(application.getUser().getName()).append("\n");
 
-      for (SkillScore skill : application.getSkillScore()) {
-        prompt.append("- ").append(skill.getTechName())
+      for (SkillScore skill : application.getSkill_score()) {
+        prompt.append("- ").append(skill.getTech_name())
             .append(": ").append(skill.getScore()).append("/10점\n");
       }
       prompt.append("\n");

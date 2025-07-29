@@ -1,9 +1,11 @@
 package com.devmatch.backend.domain.application.service;
 
+import com.devmatch.backend.domain.analysis.entity.AnalysisResult;
 import com.devmatch.backend.domain.application.dto.request.ApplicationStatusUpdateRequestDto;
 import com.devmatch.backend.domain.application.dto.response.ApplicationDetailResponseDto;
 import com.devmatch.backend.domain.application.entity.Application;
 import com.devmatch.backend.domain.application.entity.SkillScore;
+import com.devmatch.backend.domain.application.enums.ApplicationStatus;
 import com.devmatch.backend.domain.application.repository.ApplicationRepository;
 import com.devmatch.backend.domain.project.dto.ProjectApplyRequest;
 import com.devmatch.backend.domain.project.entity.Project;
@@ -45,14 +47,14 @@ public class ApplicationService {
     for (int i = 0; i < techStacks.size(); i++) {
       SkillScore score = SkillScore.builder()
           .application(application)
-          .techName(techStacks.get(i))
+          .tech_name(techStacks.get(i))
           .score(techScores.get(i))
           .build();
 
       skillScores.add(score);
     }
 
-    application.getSkillScore().addAll(skillScores);
+    application.getSkill_score().addAll(skillScores);
 
     return new ApplicationDetailResponseDto(applicationRepository.save(application));
   }
@@ -82,14 +84,6 @@ public class ApplicationService {
     return new ApplicationDetailResponseDto(getApplicationByApplicationId(id));
   }
 
-  // 지원서 삭제 로직
-  @Transactional
-  public void deleteApplication(Long id) {
-    Application application = getApplicationByApplicationId(id);
-
-    applicationRepository.delete(application); // DB 에서 삭제
-  }
-
   // 지원서 상태 업데이트 로직
   @Transactional
   public void updateApplicationStatus(Long id, ApplicationStatusUpdateRequestDto reqBody) {
@@ -99,9 +93,29 @@ public class ApplicationService {
     application.changeStatus(reqBody.status()); // 상태 업데이트
   }
 
+  // 지원서와 프로젝트간의 적합도 분석 결과를 저장하는 로직
+  @Transactional
+  public void saveAnalysisResult(Long applicationId, AnalysisResult analysisResult) {
+    Application application = getApplicationByApplicationId(applicationId);
+
+    application.setAnalysisResult(analysisResult);
+  }
+
+  // 지원서 삭제 로직
+  @Transactional
+  public void deleteApplication(Long id) {
+    Application application = getApplicationByApplicationId(id);
+
+    applicationRepository.delete(application); // DB 에서 삭제
+  }
+
   // 지원서 ID로 지원서를 가져오는 함수
-  private Application getApplicationByApplicationId(Long id) {
+  public Application getApplicationByApplicationId(Long id) {
     return applicationRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("지원서를 찾을 수 없습니다. ID: " + id));
+  }
+
+  public List<Application> findByProjectIdAndStatus(Long projectId, ApplicationStatus status) {
+    return applicationRepository.findByProjectIdAndStatus(projectId, status);
   }
 }

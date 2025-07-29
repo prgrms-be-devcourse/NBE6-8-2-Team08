@@ -16,13 +16,13 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-@Table(name = "skillScore")
+@Table(name = "skillScores")
 public class SkillScore {
 
   // 각 기술점수 기록을 구분하는 유일한 번호
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "skillScore_id")
+  @Column(name = "skill_score_id")
   private Long id;
 
   // 이 기술점수가 속한 지원서의 고유 식별자
@@ -31,17 +31,17 @@ public class SkillScore {
   private Application application;
 
   // 평가한 기술 명
-  @Column(name = "skillScore_techName", nullable = false)
-  private String techName;
+  @Column(name = "skill_score_techName", nullable = false)
+  private String tech_name;
 
   // 기술 숙련도 점수(1점 = 초급 ~ 10점 = 전문가)
-  @Column(name = "skillScore_score", nullable = false)
+  @Column(name = "skill_score_score", nullable = false)
   private int score;
 
   @Builder
-  public SkillScore(Application application, String techName, int score) {
+  public SkillScore(Application application, String tech_name, int score) {
     this.application = application;
-    this.techName = techName;
+    this.tech_name = tech_name;
     this.score = score;
   }
 }
