@@ -1,13 +1,11 @@
 package com.devmatch.backend.domain.user.dto;
 
-import com.devmatch.backend.domain.user.entity.User;
-
 public record UserRegisterDto(
-    Long id,
-    String name
+//    String name,
+//    String profileImgUrl
 ) {
 
-  public UserRegisterDto(User user) {
-    this(user.getId(), user.getName());
-  }
+//  public UserRegisterDto(User user) {
+//    this(user.getName(), user.getProfileImgUrl());
+//  }
 }
