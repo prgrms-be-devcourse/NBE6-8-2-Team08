@@ -57,10 +57,12 @@ public class ApplicationService {
     return new ApplicationDetailResponseDto(applicationRepository.save(application));
   }
 
-  // 지원서 전체 조회 로직
+  // 프로젝트 ID로 해당 프로젝트에 지원한 모든 지원서들을 가져오는 지원서 전체 조회 로직
   @Transactional(readOnly = true)
-  public List<ApplicationDetailResponseDto> getApplications(Long projectId) {
-    return getApplicationsByProjectId(projectId).stream()
+  public List<ApplicationDetailResponseDto> getApplicationsByProjectId(Long projectId) {
+    List<Application> applicationList = applicationRepository.findAllByProjectId(projectId);
+
+    return applicationList.stream()
         .map(ApplicationDetailResponseDto::new)
         .collect(Collectors.toList());
   }
@@ -91,11 +93,6 @@ public class ApplicationService {
   // 사용자 ID로 사용자가 작성한 모든 지원서들을 가져오는 함수
   public List<Application> getApplicationsByUserId(Long id) {
     return applicationRepository.findAllByUserId(id);
-  }
-
-  // 프로젝트 ID로 해당 프로젝트에 지원한 모든 지원서들을 가져오는 함수
-  public List<Application> getApplicationsByProjectId(Long id) {
-    return applicationRepository.findAllByProjectId(id);
   }
 
   // 지원서 ID로 지원서를 가져오는 함수
