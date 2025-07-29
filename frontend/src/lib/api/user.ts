@@ -1,88 +1,88 @@
-// 👤 USER API - 백엔드 UserController 연동  
-// 사용자 관련 API 함수들 (등록, 조회, 프로젝트/지원서 목록)
-
-import axios from 'axios';
-
-// 환경변수 (.env 파일의 NEXT_PUBLIC_API_URL 사용)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
 // ============================================
-// 📝 백엔드 DTO 기반 타입 정의 (실제 Java 코드와 동일)
+// 👤 사용자 관련 API 함수들
 // ============================================
 
-// 백엔드 DTO 타입들은 types/index.ts에서 가져옴
-import { 
-  UserRegisterDto, 
-  ProjectDetailResponse, 
-  ApplicationEntity,
-  ApiResponse
-} from '@/types';
-
-// 호환성을 위해 Application 타입 재정의
-export type Application = ApplicationEntity;
+import { apiClient } from './index';
+import { User, UserProjectListResponse, UserApplicationListResponse } from '@/types';
 
 // ============================================
-// 🚀 API 함수들 (백엔드 UserController 메서드와 1:1 대응)
+// 🎯 API 엔드포인트 상수들
+// ============================================
+
+const USERS_ENDPOINT = '/users';
+
+// ============================================
+// 📡 사용자 API 함수들 (백엔드 컨트롤러와 1:1 매칭)
 // ============================================
 
 /**
- * ✅ 구현완료 - POST /users/register
- * 백엔드: UserController.register(@RequestBody String name)
- * 응답: ResponseEntity<ApiResponse<UserRegisterDto>> (201 CREATED)
+ * 👤 현재 사용자 정보 조회
  * 
- * 📝 주의사항:
- * - 백엔드에서 @RequestBody String name으로 받음 (객체가 아닌 문자열)
- * - 프론트에서는 JSON 문자열로 직접 전송해야 함
- * - Content-Type: application/json 헤더 필수
+ * 📡 백엔드 API: GET /users/me
+ * 🏠 컨트롤러: UserController.getMyInfo()
+ * 📦 응답: User
  */
-export const registerUser = async (name: string): Promise<UserRegisterDto> => {
+export const getCurrentUser = async (): Promise<User> => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/users/register`, name, {
-      headers: {
-        'Content-Type': 'application/json' // 백엔드 @RequestBody String 처리용
-      }
-    });
-    return response.data.data; // ApiResponse<UserRegisterDto>에서 data 추출
+    const response = await apiClient.get('/users/me');
+    console.log('📤 [User API] 현재 사용자 정보 조회 요청');
+    return response.data.data;
   } catch (error) {
-    console.error('사용자 등록 실패:', error);
+    console.error('❌ [User API] 현재 사용자 정보 조회 실패:', error);
     throw error;
   }
 };
 
 /**
- * ✅ 구현완료 - GET /users/{id}/projects
- * 백엔드: UserController.findProjectsById(@PathVariable long id)
- * 응답: List<ProjectDetailResponse> (ApiResponse 래핑 없이 직접 반환)
+ * 🚪 로그아웃
  * 
- * 📝 주의사항:
- * - 백엔드에서 ApiResponse로 래핑하지 않고 List 직접 반환
- * - response.data로 바로 접근 (response.data.data 아님)
+ * 📡 백엔드 API: DELETE /auth/logout
+ * 🏠 컨트롤러: AuthController.logout()
+ * 📦 응답: void (성공 시 204 No Content)
  */
-export const getUserProjects = async (userId: number): Promise<ProjectDetailResponse[]> => {
+export const logout = async (): Promise<void> => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/users/${userId}/projects`);
-    return response.data; // List<ProjectDetailResponse> 직접 반환
+    await apiClient.delete('/auth/logout');
+    console.log('📤 [User API] 로그아웃 요청');
   } catch (error) {
-    console.error('사용자별 프로젝트 목록 조회 실패:', error);
+    console.error('❌ [User API] 로그아웃 실패:', error);
+    throw error;
+  }
+};
+
+
+/**
+ * 📊 사용자의 프로젝트 목록 조회
+ * 
+ * 📡 백엔드 API: GET /users/{id}/projects
+ * 🏠 컨트롤러: UserController.getProjects()
+ * 📦 응답: List<UserProjectListResponse>
+ */
+export const getUserProjects = async (id: number): Promise<UserProjectListResponse[]> => {
+  try {
+    const response = await apiClient.get(`${USERS_ENDPOINT}/${id}/projects`);
+    console.log(`📤 [User API] 사용자 프로젝트 목록 조회 요청 (ID: ${id})`);
+    return response.data.data;
+  } catch (error) {
+    console.error(`❌ [User API] 사용자 프로젝트 목록 조회 실패 (ID: ${id}):`, error);
     throw error;
   }
 };
 
 /**
- * ✅ 구현완료 - GET /users/{id}/applications  
- * 백엔드: UserController.findApplicationsById(@PathVariable long id)
- * 응답: List<Application> (ApiResponse 래핑 없이 직접 반환)
+ * 📋 사용자의 지원서 목록 조회
  * 
- * 📝 주의사항:
- * - 백엔드에서 ApiResponse로 래핑하지 않고 List 직접 반환
- * - response.data로 바로 접근 (response.data.data 아님)
+ * 📡 백엔드 API: GET /users/{id}/applications
+ * 🏠 컨트롤러: UserController.getApplications()
+ * 📦 응답: List<UserApplicationListResponse>
  */
-export const getUserApplications = async (userId: number): Promise<Application[]> => {
+export const getUserApplications = async (id: number): Promise<UserApplicationListResponse[]> => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/users/${userId}/applications`);
-    return response.data; // List<Application> 직접 반환
+    const response = await apiClient.get(`${USERS_ENDPOINT}/${id}/applications`);
+    console.log(`📤 [User API] 사용자 지원서 목록 조회 요청 (ID: ${id})`);
+    return response.data.data;
   } catch (error) {
-    console.error('사용자별 지원서 목록 조회 실패:', error);
+    console.error(`❌ [User API] 사용자 지원서 목록 조회 실패 (ID: ${id}):`, error);
     throw error;
   }
 };

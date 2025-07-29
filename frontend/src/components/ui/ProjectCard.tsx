@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Users, Code2, Clock, Target } from 'lucide-react';
-import type { ProjectDetailResponse } from '@/lib/api/project';
+import type { ProjectDetailResponse } from '@/types';
 
 interface ProjectCardProps {
   project: ProjectDetailResponse;
@@ -83,7 +83,7 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <Users className="w-4 h-4" />
-            <span>{project.creator}</span>
+            <span>{project.creator.nickname}</span>
           </div>
           <div className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
