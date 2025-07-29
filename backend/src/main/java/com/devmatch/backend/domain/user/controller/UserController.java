@@ -5,7 +5,7 @@ import com.devmatch.backend.domain.application.service.ApplicationService;
 import com.devmatch.backend.domain.project.dto.ProjectDetailResponse;
 import com.devmatch.backend.domain.project.service.ProjectService;
 import com.devmatch.backend.global.rq.Rq;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +33,7 @@ public class UserController {
 
   @GetMapping("/{id}/projects")
   public ResponseEntity<List<ProjectDetailResponse>> getProjects(
-      @Size(min = 1) @PathVariable Long id) {
+      @Min(1) @PathVariable Long id) {
     // User user = rq.getActor();
     // user.getId(); // 현재 로그인한 사용자의 ID를 가져옴
     return ResponseEntity.ok().body(projectService.getProjectsByUserId(id));
@@ -41,7 +41,7 @@ public class UserController {
 
   @GetMapping("/{id}/applications")
   public ResponseEntity<List<Application>> getApplications(
-      @Size(min = 1) @PathVariable Long id) {
+      @Min(1) @PathVariable Long id) {
     return ResponseEntity.ok()
         .body(applicationService.getApplicationsByUserId(id));
   }

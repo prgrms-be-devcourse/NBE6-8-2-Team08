@@ -23,6 +23,7 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
 
 
+  //이것도 rq로 할거니까 없어도 될듯
   @Transactional(readOnly = true)
   public User getUser(Long id) {
     return userRepository.findById(id).orElseThrow(() ->
