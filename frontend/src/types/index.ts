@@ -64,10 +64,11 @@ export interface ApplicationStatusUpdateRequest {
   status: string;
 }
 
-// 지원서 생성 요청 타입 (application.ts에서 필요)
-export interface ApplicationCreateRequest {
+// 프로젝트 지원 요청 타입 (project.ts에서 필요)
+export interface ProjectApplyRequest {
   userId: number;
-  projectId: number;
+  techStacks: string[];
+  techScores: number[];
 }
 
 // ============================================
@@ -78,7 +79,7 @@ export interface ApplicationCreateRequest {
 export type ApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 // 프로젝트 상태 (백엔드 ProjectStatus enum)  
-export type ProjectStatus = 'RECRUITING' | 'IN_PROGRESS' | 'COMPLETED';
+export type ProjectStatus = 'RECRUITING' | 'COMPLETED';
 
 // ============================================
 // 📝 참고사항
