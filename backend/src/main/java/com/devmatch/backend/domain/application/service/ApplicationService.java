@@ -47,14 +47,14 @@ public class ApplicationService {
     for (int i = 0; i < techStacks.size(); i++) {
       SkillScore score = SkillScore.builder()
           .application(application)
-          .tech_name(techStacks.get(i))
+          .techName(techStacks.get(i))
           .score(techScores.get(i))
           .build();
 
       skillScores.add(score);
     }
 
-    application.getSkill_score().addAll(skillScores);
+    application.getSkillScore().addAll(skillScores);
 
     return new ApplicationDetailResponseDto(applicationRepository.save(application));
   }

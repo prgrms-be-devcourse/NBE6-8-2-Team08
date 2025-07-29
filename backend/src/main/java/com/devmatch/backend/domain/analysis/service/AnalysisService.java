@@ -39,7 +39,7 @@ public class AnalysisService {
     Application application = applicationService.getApplicationByApplicationId(applicationId);
 
     Project project = application.getProject();
-    List<SkillScore> userSkills = application.getSkill_score();
+    List<SkillScore> userSkills = application.getSkillScore();
 
     StringBuilder prompt = new StringBuilder();
     prompt.append("당신은 전문 분석가입니다. 다음 정보를 바탕으로 지원자의 적합도를 평가해주세요.\n\n");
@@ -49,7 +49,7 @@ public class AnalysisService {
     prompt.append("지원자 기술 역량:\n");
 
     for (SkillScore skill : userSkills) {
-      prompt.append("- ").append(skill.getTech_name())
+      prompt.append("- ").append(skill.getTechName())
           .append(": ").append(skill.getScore()).append("/10점\n");
     }
 
@@ -118,8 +118,8 @@ public class AnalysisService {
     for (Application application : approvedApplications) {
       prompt.append("지원자: ").append(application.getUser().getName()).append("\n");
 
-      for (SkillScore skill : application.getSkill_score()) {
-        prompt.append("- ").append(skill.getTech_name())
+      for (SkillScore skill : application.getSkillScore()) {
+        prompt.append("- ").append(skill.getTechName())
             .append(": ").append(skill.getScore()).append("/10점\n");
       }
       prompt.append("\n");

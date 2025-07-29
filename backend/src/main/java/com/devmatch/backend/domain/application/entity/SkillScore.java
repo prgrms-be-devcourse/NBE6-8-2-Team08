@@ -32,16 +32,16 @@ public class SkillScore {
 
   // 평가한 기술 명
   @Column(name = "skill_score_techName", nullable = false)
-  private String tech_name;
+  private String techName;
 
   // 기술 숙련도 점수(1점 = 초급 ~ 10점 = 전문가)
   @Column(name = "skill_score_score", nullable = false)
   private int score;
 
   @Builder
-  public SkillScore(Application application, String tech_name, int score) {
+  public SkillScore(Application application, String techName, int score) {
     this.application = application;
-    this.tech_name = tech_name;
+    this.techName = techName;
     this.score = score;
   }
 }

@@ -62,12 +62,12 @@ public class Application {
 
   // 지원자의 기술별 점수 저장
   @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<SkillScore> skill_score = new ArrayList<>();
+  private List<SkillScore> skillScore = new ArrayList<>();
 
   // 하나의 지원서에 대해 하나의 '지원자-프로젝트 적합도' 분석 결과
   @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JoinColumn(name = "analysis_result_id")
-  private AnalysisResult analysis_result;
+  private AnalysisResult analysisResult;
 
   @Builder
   public Application(User user, Project project) {
@@ -83,11 +83,11 @@ public class Application {
     this.status = status;
   }
 
-  public void setAnalysisResult(AnalysisResult analysis_result) {
-    if (this.analysis_result != null) {
+  public void setAnalysisResult(AnalysisResult analysisResult) {
+    if (this.analysisResult != null) {
       throw new IllegalArgumentException(
-          "현재 지원서(지원서 %s번)에 분석 결과가(분석 결과 %s번) 이미 존재합니다".formatted(this.id, analysis_result.getId()));
+          "현재 지원서(지원서 %s번)에 분석 결과가(분석 결과 %s번) 이미 존재합니다".formatted(this.id, analysisResult.getId()));
     }
-    this.analysis_result = analysis_result;
+    this.analysisResult = analysisResult;
   }
 }
