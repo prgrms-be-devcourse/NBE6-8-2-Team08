@@ -5,9 +5,9 @@ import com.devmatch.backend.domain.analysis.repository.AnalysisRepository;
 import com.devmatch.backend.domain.application.entity.Application;
 import com.devmatch.backend.domain.application.entity.SkillScore;
 import com.devmatch.backend.domain.application.enums.ApplicationStatus;
-import com.devmatch.backend.domain.application.repository.ApplicationRepository;
+import com.devmatch.backend.domain.application.service.ApplicationService;
 import com.devmatch.backend.domain.project.entity.Project;
-import com.devmatch.backend.domain.project.repository.ProjectRepository;
+import com.devmatch.backend.domain.project.service.ProjectService;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -21,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AnalysisService {
 
   private final AnalysisRepository analysisRepository;
-  private final ApplicationRepository applicationRepository;
-  private final ProjectRepository projectRepository;
+  private final ApplicationService applicationService;
+  private final ProjectService projectService;
 
   private final ChatModel chatModel;
 
@@ -36,10 +36,7 @@ public class AnalysisService {
 
   @Transactional
   public AnalysisResult createAnalysisResult(Long applicationId) {
-    Application application = applicationRepository.findById(applicationId)
-        .orElseThrow(() -> new NoSuchElementException(
-            "지원서 " + applicationId + "를 찾을 수 없습니다."
-        ));
+    Application application = applicationService.getApplicationByApplicationId(applicationId);
 
     Project project = application.getProject();
     List<SkillScore> userSkills = application.getSkillScore();
@@ -90,17 +87,17 @@ public class AnalysisService {
         .compatibilityReason(reason)
         .build();
 
+    applicationService.saveAnalysisResult(result.getApplication().getId(), result);
+
     return analysisRepository.save(result);
   }
 
   @Transactional(readOnly = true)
   public String createTeamRoleAssignment(Long projectId) {
 
-    Project project = projectRepository.findById(projectId).orElseThrow(
-        () -> new NoSuchElementException("프로젝트를 찾을 수 없습니다. ID: " + projectId)
-    );
+    Project project = projectService.getProject(projectId);
 
-    List<Application> approvedApplications = applicationRepository.findByProjectIdAndStatus(
+    List<Application> approvedApplications = applicationService.findByProjectIdAndStatus(
         projectId,
         ApplicationStatus.APPROVED
     );
