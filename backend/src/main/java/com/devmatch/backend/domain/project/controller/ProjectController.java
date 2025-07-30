@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/projects")
 public class ProjectController {
 
+  private final Rq rq;
+
   private final ProjectService projectService;
   private final ApplicationService applicationService;
 
@@ -27,7 +29,7 @@ public class ProjectController {
       @Valid @RequestBody ProjectCreateRequest projectCreateRequest
   ) {
     return ResponseEntity.status(CREATED).body(new ApiResponse<>("프로젝트 생성 성공",
-        projectService.createProject(Rq.getActor().getId(), projectCreateRequest)));
+        projectService.createProject(rq.getActor().getId(), projectCreateRequest)));
   }
 
   @GetMapping
