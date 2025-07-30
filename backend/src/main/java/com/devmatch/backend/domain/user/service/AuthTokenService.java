@@ -34,7 +34,7 @@ public class AuthTokenService {
       return null;
     }
 
-    Long id = (Long) parsedPayload.get("id");
+    int id = (int) parsedPayload.get("id");
     String username = (String) parsedPayload.get("username");
     String name = (String) parsedPayload.get("name");
 
