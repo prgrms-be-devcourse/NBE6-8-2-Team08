@@ -4,13 +4,13 @@ import com.devmatch.backend.domain.application.dto.response.ApplicationDetailRes
 import com.devmatch.backend.domain.application.service.ApplicationService;
 import com.devmatch.backend.domain.project.dto.ProjectDetailResponse;
 import com.devmatch.backend.domain.project.service.ProjectService;
+import com.devmatch.backend.domain.user.entity.User;
 import com.devmatch.backend.global.rq.Rq;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,15 +24,16 @@ public class UserController {
   private final ApplicationService applicationService;
 
   @GetMapping("/{id}/projects")
-  public ResponseEntity<List<ProjectDetailResponse>> findProjectsById(@PathVariable Long id) {
-    // User user = rq.getActor();
-    // user.getId(); // 현재 로그인한 사용자의 ID를 가져옴
+  public ResponseEntity<List<ProjectDetailResponse>> findProjectsById() {
+    User actor = rq.getActor();
+    Long id = actor.getId(); // 현재 로그인한 사용자의 ID를 가져옴
     return ResponseEntity.status(HttpStatus.OK).body(projectService.getProjectsByUserId(id));
   }
 
   @GetMapping("/{id}/applications")
-  public ResponseEntity<List<ApplicationDetailResponseDto>> findApplicationsById(
-      @PathVariable Long id) {
+  public ResponseEntity<List<ApplicationDetailResponseDto>> findApplicationsById() {
+    User actor = rq.getActor();
+    Long id = actor.getId(); // 현재 로그인한 사용자의 ID를 가져옴
     return ResponseEntity.status(HttpStatus.OK)
         .body(applicationService.getApplicationsByUserId(id));
   }
