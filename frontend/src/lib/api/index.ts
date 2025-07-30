@@ -1,66 +1,73 @@
-// 🔗 API 통합 export
-// 각 도메인별 API 함수들을 개별적으로 export하여 사용
+// ============================================
+// 🌐 API 클라이언트 및 인터셉터 설정
+// ============================================
 
-// 프로젝트 관련 API
-export {
-  createProject,
-  getAllProjects,
-  getProject,
-  updateProjectStatus,
-  updateProjectContent,
-  deleteProject,
-  getProjectApplications,
-  applyToProject
-} from './project';
+import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-// 사용자 관련 API
-export {
-  registerUser,
-  getUserProjects,
-  getUserApplications
-} from './user';
+// ============================================
+// 🎯 API 클라이언트 인스턴스 생성
+// ============================================
 
-// 인증 관련 API
-export { authApi } from './auth';
+/**
+ * 🌐 Axios 인스턴스 생성
+ * 
+ * 🎯 목적: 모든 API 요청에 대한 공통 설정
+ * 🔧 설정: 기본 URL, 타임아웃, 쿠키 포함
+ */
+export const apiClient: AxiosInstance = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080', // 🏠 로컬 개발 서버
+  timeout: 10000, // ⏱️ 10초 타임아웃
+  withCredentials: true, // 🍪 쿠키 포함 (인증을 위해 필수)
+});
 
-// 지원서 관련 API
-export {
-  getApplicationDetail,
-  deleteApplication,
-  updateApplicationStatus,
-  createApplication
-} from './application';
+// ============================================
+// 🛡️ 요청 인터셉터 (요청 전 처리)
+// ============================================
 
-// 분석 관련 API
-export {
-  getAnalysisResult,
-  createAnalysisResult,
-  createTeamRoleAssignment
-} from './analysis';
-
-// 🔧 UTILITY FUNCTIONS
-// 에러 처리 유틸리티
-export const handleApiError = (error: unknown) => {
-  console.error('API 에러:', error);
-  
-  // 백엔드 GlobalExceptionHandler에서 반환하는 에러 형식에 맞춰 처리
-  if (typeof error === 'object' && error !== null && 'response' in error) {
-    const apiError = error as { response?: { data?: { message?: string } } };
-    if (apiError.response?.data?.message) {
-      return apiError.response.data.message;
-    }
+/**
+ * 📤 요청 인터셉터
+ * 
+ * 🎯 목적: 요청 전 로깅 및 토큰 추가
+ * 📝 실제 토큰 추가는 필요 시 구현
+ */
+apiClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    console.log(`📤 [API Request] ${config.method?.toUpperCase()} ${config.url}`, config.data || '');
+    return config;
+  },
+  (error) => {
+    console.error('❌ [API Request Error]', error);
+    return Promise.reject(error);
   }
-  
-  return '서버 오류가 발생했습니다.';
-};
+);
 
-// API 연결 상태 확인
-export const checkApiConnection = async (): Promise<boolean> => {
-  try {
-    // const response = await fetch('/api/health'); // 헬스체크 엔드포인트 필요
-    // return response.status === 200;
-    return false; // 현재는 연결 안됨
-  } catch {
-    return false;
+// ============================================
+// 🛡️ 응답 인터셉터 (응답 후 처리)
+// ============================================
+
+/**
+ * 📥 응답 인터셉터
+ * 
+ * 🎯 목적: 응답 후 로깅 및 에러 처리
+ * ✅ 성공 응답: 데이터 직접 반환 (response.data.data)
+ * ❌ 에러 응답: 에러 메시지 추출 및 표시
+ */
+apiClient.interceptors.response.use(
+  (response: AxiosResponse) => {
+    console.log(`📥 [API Response] ${response.status} ${response.config.url}`, response.data);
+    return response.data; // 🎯 데이터 직접 반환 (response.data.data)
+  },
+  (error) => {
+    console.error('❌ [API Response Error]', error.response?.data || error.message);
+    return Promise.reject(error);
   }
-};
+);
+
+// ============================================
+// 📡 각 도메인별 API 함수들 통합 내보내기
+// ============================================
+
+export * as projectApi from './project';
+export * as userApi from './user';
+export * as authApi from './auth';
+export * as applicationApi from './application';

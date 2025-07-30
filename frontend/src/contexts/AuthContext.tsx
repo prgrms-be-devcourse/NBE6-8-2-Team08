@@ -1,35 +1,57 @@
-"use client";
+// ============================================
+// 🔐 인증 컨텍스트 (로그인 상태 관리)
+// ============================================
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authApi } from '@/lib/api/auth';
+import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import { getCurrentUser } from '@/lib/api/user';
+import { logout } from '@/lib/api/auth';
 import { User } from '@/types';
+
+
+// ============================================
+// 📊 컨텍스트 타입 정의
+// ============================================
 
 interface AuthContextType {
   user: User | null;
-  login: (userData: User) => void;
-  logout: () => void;
   isAuthenticated: boolean;
+  login: (user: User) => void;
+  logout: () => Promise<void>;
   loading: boolean;
 }
 
+// ============================================
+// 🎯 컨텍스트 생성
+// ============================================
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+// ============================================
+// 🏗️ AuthProvider 컴포넌트
+// ============================================
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔗 API 연결 완료: 세션 확인
-  // 백엔드 세션 기반 인증 시스템과 연결
+  // ============================================
+  // 🔄 인증 상태 확인 (페이지 로드 시)
+  // ============================================
+  
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // 실제 세션 확인 API 호출
-        const userData = await authApi.getCurrentUser();
-        if (userData) {
-          setUser(userData);
-        }
+        // 백엔드에서 현재 사용자 정보 가져오기
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
       } catch (error) {
-        console.error('Auth status check failed:', error);
+        // 인증 실패 시 로그아웃 상태 유지
+        console.warn('인증 상태 확인 실패:', error);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -38,28 +60,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkAuthStatus();
   }, []);
 
-  const login = async (userData: User) => {
+  // ============================================
+  // 🔐 로그인 함수
+  // ============================================
+  
+  const login = (userData: User) => {
     setUser(userData);
-    // 세션 쿠키를 사용하므로 로컬스토리지 저장 불필요
   };
 
+  // ============================================
+  // 🚪 로그아웃 함수
+  // ============================================
+  
   const logout = async () => {
     try {
-      // 실제 로그아웃 API 호출
-      await authApi.logout();
+      // 백엔드 로그아웃 API 호출
+      await logout();
+      // 로컬 상태 업데이트
       setUser(null);
     } catch (error) {
-      console.error('Logout failed:', error);
-      // 클라이언트에서라도 로그아웃 처리
+      console.error('로그아웃 처리 중 오류:', error);
+      // 에러 발생 시에도 로컬 상태는 업데이트
       setUser(null);
     }
   };
 
+
+  // ============================================
+  // 📦 컨텍스트 값
+  // ============================================
+  
   const value = {
     user,
+    isAuthenticated: !!user,
     login,
     logout,
-    isAuthenticated: !!user,
     loading,
   };
 
@@ -68,12 +103,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
-  const context = useContext(AuthContext);
+// ============================================
+// 🎯 커스텀 훅
+// ============================================
+
+export const useAuth = () => {
+  const context = React.useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+};
+
+export default AuthContext;

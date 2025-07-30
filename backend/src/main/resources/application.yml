@@ -4,7 +4,7 @@ spring:
   application:
     name: backend
   config:
-    import: optional:file:.env[.properties]
+    import: optional:file:.env.default[.properties]
   profiles:
     active: dev
     include: secret

@@ -1,575 +1,294 @@
-"use client";
+'use client';
 
-"use client";
-
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  DollarSign, 
-  MapPin, 
-  Clock, 
-  Users, 
-  Star, 
-  Github, 
-  ExternalLink, 
-  MessageCircle,
-  Heart,
-  Share2,
-  Zap,
-  Code,
-  Database,
-  Smartphone,
-  AlertCircle
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { getProject, ProjectDetailResponse, applyToProject } from '@/lib/api/project';
-import { ProjectApplyRequest } from '@/types';
-import { useEffect } from 'react';
+import { 
+  projectApi, 
+  applicationApi, 
+  userApi
+} from '@/lib/api';
+
+import { 
+  ProjectDetailResponse, 
+  UserApplicationListResponse, 
+  ApplicationDetailResponse,
+  User
+} from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface Developer {
-  id: string;
-  name: string;
-  avatar: string;
-  role: string;
-  rating: number;
-  skills: string[];
-}
-
-interface ProjectDetail extends ProjectDetailResponse {
-  featured?: boolean;
-  urgency?: 'low' | 'medium' | 'high';
-  applications?: number;
-  matchedDevelopers?: Developer[];
-  budget?: string;
-  location?: string;
-}
-
-const ProjectDetailPage: React.FC = () => {
-  const params = useParams();
-  const { user, isAuthenticated } = useAuth();
-  const [isLiked, setIsLiked] = useState(false);
-  const [hasApplied, setHasApplied] = useState(false);
-  const [project, setProject] = useState<ProjectDetail | null>(null);
+export default function ProjectDetailPage() {
+  const { id } = useParams();
+  const router = useRouter();
+  const { user } = useAuth();
+  
+  const [project, setProject] = useState<ProjectDetailResponse | null>(null);
+  const [applications, setApplications] = useState<UserApplicationListResponse[]>([]);
+  const [userApplication, setUserApplication] = useState<ApplicationDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [techScores, setTechScores] = useState<Record<string, number>>({});
   const [isApplying, setIsApplying] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const fetchProject = async () => {
-      if (!params.id) return;
-      
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const projectId = Number(params.id);
-        const projectData = await getProject(projectId);
-        
-        // 기존 데이터에 새로운 필드 추가
-        const enhancedProject: ProjectDetail = {
-          ...projectData,
-          featured: true,
-          urgency: 'high',
-          applications: 47,
-          matchedDevelopers: [
-            {
-              id: "dev-1",
-              name: "Sarah Chen",
-              avatar: "/api/placeholder/50/50",
-              role: "Full-Stack Developer",
-              rating: 4.9,
-              skills: ["React Native", "Node.js", "AI/ML"]
-            },
-            {
-              id: "dev-2",
-              name: "Marcus Rodriguez",
-              avatar: "/api/placeholder/50/50",
-              role: "Mobile Developer",
-              rating: 4.7,
-              skills: ["Flutter", "Firebase", "UI/UX"]
-            },
-            {
-              id: "dev-3",
-              name: "Alex Kim",
-              avatar: "/api/placeholder/50/50",
-              role: "Backend Developer",
-              rating: 4.8,
-              skills: ["Node.js", "MongoDB", "AWS"]
-            }
-          ]
-        };
-        
-        setProject(enhancedProject);
-        
-        // 기술 스택별 점수 초기화
-        const initialScores: Record<string, number> = {};
-        projectData.techStacks.forEach(tech => {
-          initialScores[tech] = 5; // 기본 점수 5
-        });
-        setTechScores(initialScores);
-      } catch (err) {
-        console.error('프로젝트 조회 실패:', err);
-        setError('프로젝트 정보를 불러오는데 실패했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (id) {
+      fetchProjectData();
+    }
+  }, [id]);
 
-    fetchProject();
-  }, [params.id]);
+  const fetchProjectData = async () => {
+    try {
+      setLoading(true);
+      const [projectData, applicationsData] = await Promise.all([
+        projectApi.getProject(Number(id)),
+        projectApi.getProjectApplications(Number(id))
+      ]);
+      
+      setProject(projectData);
+      setApplications(applicationsData);
+      
+      // 현재 사용자의 지원서가 있는지 확인
+      if (user) {
+        const userApp = applicationsData.find(app => app.user.id === user.id);
+        if (userApp) {
+          const appDetails = await applicationApi.getApplication(userApp.applicationId);
+          setUserApplication(appDetails);
+        }
+      }
+    } catch (err) {
+      console.error('프로젝트 데이터 조회 실패:', err);
+      setError('프로젝트 데이터를 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleApply = async () => {
-    if (!project || !user) return;
-    
-    // 유효성 검사
-    if (Object.keys(techScores).length === 0) {
-      alert('기술 스택 점수를 입력해주세요.');
-      return;
-    }
-    
-    setIsApplying(true);
+    if (!user || !project) return;
     
     try {
-      // 기술 스택별 점수를 배열로 변환
-      const techStacks = Object.keys(techScores);
-      const techScores_array = Object.values(techScores);
+      setIsApplying(true);
+      // 실제 구현 시 사용자의 기술 스택과 점수를 입력받아야 함
+      const mockTechStacks = ['JavaScript', 'React'];
+      const mockTechScores = [8, 7];
       
-      // 프로젝트 지원 요청 데이터
-      const applicationData: ProjectApplyRequest = {
+      const newApplication = await projectApi.applyToProject(project.id, {
         userId: user.id,
-        techStacks,
-        techScores: techScores_array
-      };
+        techStacks: mockTechStacks.join(','),
+        techScores: mockTechScores
+      });
+
+
+
       
-      // 프로젝트 지원 API 호출
-      await applyToProject(project.id, applicationData);
-      
-      // 지원 상태 업데이트
-      setHasApplied(true);
-      
-      alert('프로젝트에 성공적으로 지원했습니다!');
+      setUserApplication(newApplication);
+      // 지원서 목록 새로고침
+      const updatedApplications = await projectApi.getProjectApplications(project.id);
+      setApplications(updatedApplications);
     } catch (err) {
-      console.error('지원서 제출 실패:', err);
-      alert('지원서 제출에 실패했습니다. 다시 시도해주세요.');
+      console.error('프로젝트 지원 실패:', err);
+      alert('프로젝트 지원에 실패했습니다.');
     } finally {
       setIsApplying(false);
     }
   };
 
-  const handleTechScoreChange = (tech: string, score: number) => {
-    setTechScores(prev => ({
-      ...prev,
-      [tech]: Math.max(1, Math.min(10, score)) // 1-10 사이의 값으로 제한
-    }));
-  };
-
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case 'high': return 'bg-red-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
+  const handleDeleteApplication = async () => {
+    if (!userApplication) return;
+    
+    try {
+      setIsDeleting(true);
+      await applicationApi.deleteApplication(userApplication.applicationId);
+      setUserApplication(null);
+      // 지원서 목록 새로고침
+      if (project) {
+        const updatedApplications = await projectApi.getProjectApplications(project.id);
+        setApplications(updatedApplications);
+      }
+    } catch (err) {
+      console.error('지원서 삭제 실패:', err);
+      alert('지원서 삭제에 실패했습니다.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'RECRUITING': return 'bg-green-500';
-      case 'IN_PROGRESS': return 'bg-blue-500';
-      case 'COMPLETED': return 'bg-gray-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'RECRUITING': return '모집중';
-      case 'IN_PROGRESS': return '진행중';
-      case 'COMPLETED': return '완료';
-      default: return status;
+  const handleDeleteProject = async () => {
+    if (!project) return;
+    
+    if (confirm('정말로 이 프로젝트를 삭제하시겠습니까?')) {
+      try {
+        await projectApi.deleteProject(project.id);
+        router.push('/projects');
+      } catch (err) {
+        console.error('프로젝트 삭제 실패:', err);
+        alert('프로젝트 삭제에 실패했습니다.');
+      }
     }
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">프로젝트 정보를 불러오는 중...</p>
-        </div>
-      </div>
-    );
+    return <div className="container mx-auto py-8">로딩 중...</div>;
   }
 
-  if (error || !project) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
-            <div className="text-red-500 text-4xl">⚠️</div>
-          </div>
-          <h2 className="text-2xl font-black mb-4 text-red-600">
-            {error ? '프로젝트 로드 실패' : '프로젝트를 찾을 수 없습니다'}
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            {error || '잘못된 프로젝트 ID이거나 삭제된 프로젝트입니다.'}
-          </p>
-          <Button asChild variant="destructive">
-            <Link href="/">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              메인으로 돌아가기
-            </Link>
-          </Button>
-        </div>
-      </div>
-    );
+  if (error) {
+    return <div className="container mx-auto py-8 text-red-500">{error}</div>;
   }
+
+  if (!project) {
+    return <div className="container mx-auto py-8">프로젝트를 찾을 수 없습니다.</div>;
+  }
+
+  const isProjectOwner = user?.id === project.creator.id;
+  const hasApplied = !!userApplication;
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <Button 
-            variant="outline" 
-            asChild
-            className="mb-4"
-          >
-            <Link href="/">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Projects
-            </Link>
-          </Button>
-        </motion.div>
+    <div className="container mx-auto py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">{project.title}</h1>
+        {isProjectOwner && (
+          <div className="space-x-2">
+            <Button variant="outline" onClick={() => router.push(`/projects/${project.id}/edit`)}>
+              수정
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteProject}>
+              삭제
+            </Button>
+          </div>
+        )}
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Project Header Card */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <Card className="p-8 bg-white/80 backdrop-blur-sm">
-                <div className="flex flex-wrap gap-3 mb-4">
-                  {project.featured && (
-                    <Badge className="bg-yellow-400 text-black">
-                      <Star className="w-3 h-3 mr-1" />
-                      Featured
-                    </Badge>
-                  )}
-                  <Badge className={`${getStatusColor(project.status)} text-white`}>
-                    {getStatusText(project.status).toUpperCase()}
-                  </Badge>
-                  <Badge className={`${getUrgencyColor(project.urgency || 'medium')} text-white`}>
-                    <Zap className="w-3 h-3 mr-1" />
-                    {(project.urgency || 'medium').toUpperCase()} PRIORITY
-                  </Badge>
-                </div>
+      <Card className="mb-8">
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="text-2xl mb-2">{project.title}</CardTitle>
+              <p className="text-gray-600">생성자: {project.creator.nickname}</p>
+            </div>
+            <Badge variant={project.status === 'RECRUITING' ? 'default' : 'secondary'}>
+              {project.status === 'RECRUITING' ? '모집중' : '모집완료'}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">프로젝트 설명</h3>
+              <p className="text-gray-700">{project.description}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-2">기술 스택</h3>
+              <div className="flex flex-wrap gap-2">
+                {project.techStacks.map((tech, index) => (
+                  <Badge key={index} variant="secondary">{tech}</Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <Separator className="my-6" />
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <h4 className="font-medium text-gray-500">팀원 수</h4>
+              <p className="text-lg">{project.currentTeamSize} / {project.teamSize}</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-500">예상 기간</h4>
+              <p className="text-lg">{project.durationWeeks}주</p>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-500">생성일</h4>
+              <p className="text-lg">{new Date(project.createdAt).toLocaleDateString()}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-                <h1 className="text-4xl font-black mb-4 text-foreground">
-                  {project.title}
-                </h1>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* 역할 배분 및 분석 결과 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>역할 배분 및 분석 결과</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {project.content ? (
+              <div className="prose max-w-none">
+                <p>{project.content}</p>
+              </div>
+            ) : (
+              <p className="text-gray-500">역할 배분 내용이 없습니다.</p>
+            )}
+          </CardContent>
+        </Card>
 
-                <div className="flex flex-wrap gap-6 mb-6 text-sm">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-green-600" />
-                    <span className="font-bold">{project.budget || '미정'}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-blue-600" />
-                    <span>{project.teamSize}명 팀</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-red-600" />
-                    <span>{project.location || '원격'}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-purple-600" />
-                    <span>생성일: {new Date(project.createdAt).toLocaleDateString('ko-KR')}</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button 
-                    className={`flex-1 font-black text-lg py-6 ${
-                      hasApplied 
-                        ? 'bg-green-500 hover:bg-green-600' 
-                        : 'bg-blue-500 hover:bg-blue-600'
-                    } text-white`}
-                    onClick={handleApply}
-                    disabled={hasApplied || !user || isApplying}
-                  >
-                    {isApplying ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                        지원 중...
-                      </>
-                    ) : hasApplied ? (
-                      '지원 완료 ✓'
-                    ) : user ? (
-                      '프로젝트 지원하기'
-                    ) : (
-                      '로그인 후 지원하기'
-                    )}
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="px-6"
-                    onClick={() => setIsLiked(!isLiked)}
-                  >
-                    <Heart className={`w-5 h-5 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="px-6"
-                  >
-                    <Share2 className="w-5 h-5" />
-                  </Button>
-                </div>
-              </Card>
-            </motion.div>
-
-            {/* Project Description */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card className="p-8 bg-white/80 backdrop-blur-sm">
-                <h2 className="text-2xl font-black mb-4 text-foreground">프로젝트 설명</h2>
-                <p className="text-muted-foreground leading-relaxed text-lg">
-                  {project.description}
-                </p>
-                
-                {project.content && (
-                  <>
-                    <Separator className="my-6" />
-                    <div className="whitespace-pre-wrap text-muted-foreground">
-                      {project.content}
+        {/* 지원서 및 팀원 목록 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>지원서 및 팀원 목록</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!isProjectOwner && (
+              <div className="mb-6">
+                {hasApplied ? (
+                  <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                    <div>
+                      <h3 className="font-medium">이미 지원하셨습니다.</h3>
+                      <p className="text-sm text-gray-600">상태: {userApplication?.status === 'PENDING' ? '대기중' : userApplication?.status}</p>
                     </div>
-                  </>
-                )}
-              </Card>
-            </motion.div>
-
-            {/* Requirements */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <Card className="p-8 bg-white/80 backdrop-blur-sm">
-                <h2 className="text-2xl font-black mb-6 text-foreground">요구사항</h2>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-muted-foreground">5+ years experience in React Native or Flutter</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-muted-foreground">Experience with AI/ML integration</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-muted-foreground">Strong backend development skills</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-muted-foreground">Previous e-commerce project experience</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-muted-foreground">Excellent communication skills</span>
-                  </li>
-                </ul>
-              </Card>
-            </motion.div>
-
-            {/* Tech Stack with Scores */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <Card className="p-8 bg-white/80 backdrop-blur-sm">
-                <h2 className="text-2xl font-black mb-6 text-foreground">기술 스택 점수</h2>
-                <p className="text-sm text-muted-foreground mb-4">
-                  각 기술 스택에 대한 자신있는 점수를 입력해주세요 (1-10점)
-                </p>
-                
-                {project.techStacks.length > 0 ? (
-                  <div className="space-y-4">
-                    {project.techStacks.map((tech, index) => (
-                      <div key={index} className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 w-40">
-                          <Code className="w-4 h-4 text-purple-500" />
-                          <span className="font-medium">{tech}</span>
-                        </div>
-                        <div className="flex-1">
-                          <input
-                            type="range"
-                            min="1"
-                            max="10"
-                            value={techScores[tech] || 5}
-                            onChange={(e) => handleTechScoreChange(tech, parseInt(e.target.value))}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                            disabled={!user || hasApplied}
-                          />
-                        </div>
-                        <div className="w-10 text-center">
-                          <span className="font-bold text-lg">{techScores[tech] || 5}</span>
-                        </div>
-                      </div>
-                    ))}
+                    <Button 
+                      variant="outline" 
+                      onClick={handleDeleteApplication}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? '취소 중...' : '지원 취소'}
+                    </Button>
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <Code className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">등록된 기술 스택이 없습니다.</p>
-                  </div>
+                  <Button 
+                    onClick={handleApply} 
+                    disabled={isApplying}
+                    className="w-full"
+                  >
+                    {isApplying ? '지원 중...' : '프로젝트 지원하기'}
+                  </Button>
                 )}
-                
-                {!user && (
-                  <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-yellow-800">로그인이 필요합니다</p>
-                      <p className="text-sm text-yellow-700">
-                        프로젝트에 지원하려면 먼저 로그인해주세요.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </Card>
-            </motion.div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Client Info */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card className="p-6 bg-white/80 backdrop-blur-sm">
-                <h3 className="text-xl font-black mb-4 text-foreground">클라이언트</h3>
-                <div className="flex items-center gap-4 mb-4">
-                  <Avatar className="w-16 h-16 border-2 border-black">
-                    <AvatarImage src="/api/placeholder/60/60" alt={project.creator} />
-                    <AvatarFallback>TC</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h4 className="font-bold text-lg">{project.creator}</h4>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-semibold">4.8</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  <p>23 projects completed</p>
-                </div>
-                <Button 
-                  variant="outline" 
-                  className="w-full mt-4"
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Contact Client
-                </Button>
-              </Card>
-            </motion.div>
-
-            {/* Project Stats */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <Card className="p-6 bg-white/80 backdrop-blur-sm">
-                <h3 className="text-xl font-black mb-4 text-foreground">프로젝트 통계</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">지원자 수</span>
-                    <span className="font-bold">{project.applications}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">팀 구성</span>
-                    <span className="font-bold">{project.currentTeamSize || 0} / {project.teamSize} 명</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">카테고리</span>
-                    <Badge className="bg-cyan-500 text-white">
-                      Mobile Development
-                    </Badge>
-                  </div>
-                  <div className="pt-2">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-muted-foreground">진행률</span>
-                      <span className="font-bold">0%</span>
-                    </div>
-                    <Progress value={0} className="h-2" />
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-
-            {/* Matched Developers */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <Card className="p-6 bg-white/80 backdrop-blur-sm">
-                <h3 className="text-xl font-black mb-4 text-foreground">추천 개발자</h3>
-                <div className="space-y-4">
-                  {project.matchedDevelopers && project.matchedDevelopers.map((dev) => (
-                    <div key={dev.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border-2 border-gray-200">
-                      <Avatar className="w-12 h-12 border-2 border-black">
-                        <AvatarImage src={dev.avatar} alt={dev.name} />
-                        <AvatarFallback>{dev.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-sm">{dev.name}</h4>
-                        <p className="text-xs text-muted-foreground">{dev.role}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                          <span className="text-xs font-semibold">{dev.rating}</span>
+              </div>
+            )}
+            
+            <div className="space-y-4">
+              <h3 className="font-medium">지원자 목록 ({applications.length})</h3>
+              {applications.length > 0 ? (
+                <div className="space-y-3">
+                  {applications.map((application) => (
+                    <div key={application.applicationId} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="font-medium">
+                            {application.user.nickname.charAt(0)}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium">{application.user.nickname}</p>
+                          <p className="text-sm text-gray-500">{application.user.username}</p>
                         </div>
                       </div>
+                      <Badge variant={application.status === 'PENDING' ? 'default' : 'secondary'}>
+                        {application.status === 'PENDING' ? '대기중' : application.status}
+                      </Badge>
                     </div>
                   ))}
                 </div>
-                <Button 
-                  variant="outline" 
-                  className="w-full mt-4"
-                >
-                  View All Matches
-                </Button>
-              </Card>
-            </motion.div>
-          </div>
-        </div>
+              ) : (
+                <p className="text-gray-500 text-center py-4">아직 지원자가 없습니다.</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
-};
-
-export default ProjectDetailPage;
+}
