@@ -11,7 +11,7 @@ import com.devmatch.backend.domain.project.dto.ProjectApplyRequest;
 import com.devmatch.backend.domain.project.entity.Project;
 import com.devmatch.backend.domain.project.service.ProjectService;
 import com.devmatch.backend.domain.user.entity.User;
-import com.devmatch.backend.domain.user.service.UserService;
+import com.devmatch.backend.global.rq.Rq;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -25,14 +25,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApplicationService {
 
   private final ApplicationRepository applicationRepository;
-  private final UserService userService;
   private final ProjectService projectService;
+  private final Rq rq;
 
   // 지원서 작성 로직
   @Transactional
-  public ApplicationDetailResponseDto createApplication(Long id, ProjectApplyRequest projectApplyRequest) {
-    User user = userService.getUser(projectApplyRequest.userId());
-    Project project = projectService.getProject(id);
+  public ApplicationDetailResponseDto createApplication(Long projectId, ProjectApplyRequest projectApplyRequest) {
+    User user = rq.getActor(); // 현재 로그인한 사용자의 정보 가져오기
+    Project project = projectService.getProject(projectId); // 프로젝트 ID로 프로젝트 정보 가져오기
 
     Application application = Application.builder()
         .user(user)
@@ -72,6 +72,7 @@ public class ApplicationService {
   }
 
   // 사용자 ID로 사용자가 작성한 모든 지원서들을 가져오는 지원서 전체 조회 로직
+  @Transactional(readOnly = true)
   public List<ApplicationDetailResponseDto> getApplicationsByUserId(Long userId) {
     List<Application> applicationList = applicationRepository.findAllByUserId(userId);
 
@@ -82,14 +83,14 @@ public class ApplicationService {
 
   // 지원서 상세 조회 로직
   @Transactional(readOnly = true)
-  public ApplicationDetailResponseDto getApplicationDetail(Long id) {
-    return new ApplicationDetailResponseDto(getApplicationByApplicationId(id));
+  public ApplicationDetailResponseDto getApplicationDetail(Long applicationId) {
+    return new ApplicationDetailResponseDto(getApplicationByApplicationId(applicationId));
   }
 
   // 지원서 상태 업데이트 로직
   @Transactional
-  public void updateApplicationStatus(Long id, ApplicationStatusUpdateRequestDto reqBody) {
-    Application application = getApplicationByApplicationId(id);
+  public void updateApplicationStatus(Long applicationId, ApplicationStatusUpdateRequestDto reqBody) {
+    Application application = getApplicationByApplicationId(applicationId);
 
     // 엔티티가 영속성 컨텍스트 안에 있으면, 트랜잭션 종료 시점에 자동으로 DB에 반영됩니다 (Dirty Checking)
     application.changeStatus(reqBody.status()); // 상태 업데이트
@@ -105,18 +106,19 @@ public class ApplicationService {
 
   // 지원서 삭제 로직
   @Transactional
-  public void deleteApplication(Long id) {
-    Application application = getApplicationByApplicationId(id);
+  public void deleteApplication(Long applicationId) {
+    Application application = getApplicationByApplicationId(applicationId);
 
     applicationRepository.delete(application); // DB 에서 삭제
   }
 
   // 지원서 ID로 지원서를 가져오는 함수
-  public Application getApplicationByApplicationId(Long id) {
-    return applicationRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("지원서를 찾을 수 없습니다. ID: " + id));
+  public Application getApplicationByApplicationId(Long applicationId) {
+    return applicationRepository.findById(applicationId)
+        .orElseThrow(() -> new NoSuchElementException("지원서를 찾을 수 없습니다. ID: " + applicationId));
   }
 
+  // 프로젝트 ID와 상태로 지원서를 조회하는 함수
   public List<Application> findByProjectIdAndStatus(Long projectId, ApplicationStatus status) {
     return applicationRepository.findByProjectIdAndStatus(projectId, status);
   }
