@@ -92,6 +92,9 @@ public class ApplicationService {
   public void updateApplicationStatus(Long applicationId, ApplicationStatusUpdateRequestDto reqBody) {
     Application application = getApplicationByApplicationId(applicationId);
 
+    // 지원서의 상태를 업데이트 하면서 프로젝트에도 반영
+    application.getProject().changeCurTeamSize(application.getStatus(), reqBody.status());
+
     // 엔티티가 영속성 컨텍스트 안에 있으면, 트랜잭션 종료 시점에 자동으로 DB에 반영됩니다 (Dirty Checking)
     application.changeStatus(reqBody.status()); // 상태 업데이트
   }
