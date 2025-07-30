@@ -89,7 +89,7 @@ public class SecurityConfig {
     return http.build();
   }
 
-  @Bean//이 코드 WebMvcConfig이거랑 중복같은데 -> 시큐리티 필터 체인을 쓸 때 사용(WebMvc는 안써도 된다.)
+  @Bean// CORS 설정을 위한 Bean 등록
   public UrlBasedCorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
 
