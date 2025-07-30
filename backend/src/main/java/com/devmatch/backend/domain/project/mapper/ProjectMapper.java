@@ -8,7 +8,6 @@ public class ProjectMapper {
 
   public static ProjectDetailResponse toProjectDetailResponse(Project project) {
     return new ProjectDetailResponse(
-        project.getId(),
         project.getTitle(),
         project.getDescription(),
         Arrays.stream(project.getTechStack().split(", ")).toList(),
@@ -17,6 +16,7 @@ public class ProjectMapper {
         project.getCreator().getNickName(),
         project.getStatus().name(),
         project.getContent(),
+        project.getDurationWeeks(),
         project.getCreatedAt()
     );
   }

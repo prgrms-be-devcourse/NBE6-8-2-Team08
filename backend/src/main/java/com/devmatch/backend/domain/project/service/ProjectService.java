@@ -22,7 +22,10 @@ public class ProjectService {
   private final ProjectRepository projectRepository;
 
   @Transactional
-  public ProjectDetailResponse createProject(ProjectCreateRequest projectCreateRequest) {
+  public ProjectDetailResponse createProject(
+      Long userId,
+      ProjectCreateRequest projectCreateRequest
+  ) {
     if (!projectCreateRequest.techStack().matches("^([\\w .+#-]+)(, [\\w .+#-]+)*$")) {
       throw new IllegalArgumentException("기술 스택 기재 형식이 올바르지 않습니다. \", \"로 구분해주세요");
     }
@@ -32,7 +35,7 @@ public class ProjectService {
         projectCreateRequest.description(),
         projectCreateRequest.techStack(),
         projectCreateRequest.teamSize(),
-        userService.getUser(projectCreateRequest.userId()),
+        userService.getUser(userId),
         projectCreateRequest.durationWeeks()
     );
 
