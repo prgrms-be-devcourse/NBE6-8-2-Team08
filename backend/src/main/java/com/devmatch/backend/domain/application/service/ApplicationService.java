@@ -62,6 +62,8 @@ public class ApplicationService {
   // 프로젝트 ID로 해당 프로젝트에 지원한 모든 지원서들을 가져오는 지원서 전체 조회 로직
   @Transactional(readOnly = true)
   public List<ApplicationDetailResponseDto> getApplicationsByProjectId(Long projectId) {
+    projectService.getProject(projectId);
+
     List<Application> applicationList = applicationRepository.findAllByProjectId(projectId);
 
     return applicationList.stream()
