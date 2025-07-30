@@ -62,7 +62,6 @@ public class ProjectController {
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(@PathVariable Long id) {
-    // TODO: 인증 구현되면 인가를 지나서 여기 도달하면 사용자의 id를 통해 서비스에서 연관관계 끊어줘야 함.
     projectService.deleteProject(id);
     return ResponseEntity.noContent().build();
   }
