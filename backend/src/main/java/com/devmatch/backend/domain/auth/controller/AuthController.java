@@ -2,7 +2,6 @@ package com.devmatch.backend.domain.auth.controller;
 
 import com.devmatch.backend.global.RsData;
 import com.devmatch.backend.global.rq.Rq;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +16,6 @@ public class AuthController {
 
   //로그아웃은 소셜이랑 무관
   @DeleteMapping("/logout")
-  @Operation(summary = "로그아웃")
   public RsData<Void> logout() {
     rq.deleteCookie("apiKey");
     rq.deleteCookie("accessToken");

@@ -11,29 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class AppConfig {
-  //이건 필요 없지
-//    private static Environment environment;
-//
-//    @Autowired
-//    public void setEnvironment(Environment environment) {
-//        AppConfig.environment = environment;
-//    }
-//
-//    public static boolean isDev() {
-//        return environment.matchesProfiles("dev");
-//    }
-//
-//    public static boolean isTest() {
-//        return !environment.matchesProfiles("test");
-//    }
-//
-//    public static boolean isProd() {
-//        return environment.matchesProfiles("prod");
-//    }
-//
-//    public static boolean isNotProd() {
-//        return !isProd();
-//    }
 
   @Bean
   PasswordEncoder passwordEncoder() {
