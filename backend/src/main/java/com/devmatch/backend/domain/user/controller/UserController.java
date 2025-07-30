@@ -23,14 +23,14 @@ public class UserController {
   private final ProjectService projectService;
   private final ApplicationService applicationService;
 
-  @GetMapping("/{id}/projects")
+  @GetMapping("/projects")
   public ResponseEntity<List<ProjectDetailResponse>> findProjectsById() {
     User actor = rq.getActor();
     Long id = actor.getId(); // 현재 로그인한 사용자의 ID를 가져옴
     return ResponseEntity.status(HttpStatus.OK).body(projectService.getProjectsByUserId(id));
   }
 
-  @GetMapping("/{id}/applications")
+  @GetMapping("/applications")
   public ResponseEntity<List<ApplicationDetailResponseDto>> findApplicationsById() {
     User actor = rq.getActor();
     Long id = actor.getId(); // 현재 로그인한 사용자의 ID를 가져옴
