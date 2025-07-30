@@ -3,6 +3,7 @@ package com.devmatch.backend.domain.project.entity;
 import static jakarta.persistence.FetchType.LAZY;
 
 import com.devmatch.backend.domain.application.entity.Application;
+import com.devmatch.backend.domain.application.enums.ApplicationStatus;
 import com.devmatch.backend.domain.user.entity.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -71,6 +72,24 @@ public class Project {
     }
 
     this.status = newStatus;
+  }
+
+  public void changeCurTeamSize(ApplicationStatus oldStatus, ApplicationStatus newStatus) {
+    if (oldStatus != ApplicationStatus.APPROVED && newStatus == ApplicationStatus.APPROVED) {
+      if (this.currentTeamSize.equals(this.teamSize)) {
+        throw new IllegalArgumentException("정원이 가득 차서 지원서를 더 이상 승인할 수 없습니다");
+      }
+
+      this.currentTeamSize++;
+    } else if (oldStatus == ApplicationStatus.APPROVED && newStatus != ApplicationStatus.APPROVED) {
+      this.currentTeamSize--;
+    }
+
+    if (this.currentTeamSize.equals(this.teamSize)) {
+      this.status = ProjectStatus.COMPLETED;
+    } else {
+      this.status = ProjectStatus.RECRUITING;
+    }
   }
 
   public void changeContent(String content) {

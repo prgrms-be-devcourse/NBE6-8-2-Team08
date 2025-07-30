@@ -12,7 +12,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -52,16 +51,18 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
   private void work(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
     // API 요청이 아니라면 패스
-    if (!request.getRequestURI().startsWith("/api/")) {//여기 고쳐야함.
-      filterChain.doFilter(request, response);
-      return;
-    }
+    //api는 꼭 붙이는게 좋다. h2 스웨거 같은거 걸러야 할 때
+//    if (!request.getRequestURI().startsWith("/api/")) {
+//      filterChain.doFilter(request, response);
+//      return;
+//    }
 
     //인증, 인가가 필요없는 API 요청이라면 패스
     //여기까진 모든 필터에서 적용되는 부분. 로그인을 했냐 안했냐로 시점이 나뉨
     //로그인을 안했으면 이 밑으로는 진행이 안됨.
     //로그인 url로 요청 들어온거면 토큰 검사확인 불필요
-    if (List.of("/login/oauth/2", "/auth/logout").contains(request.getRequestURI())) {
+    if (request.getRequestURI().startsWith("/oauth2/authorization/") || request.getRequestURI()
+        .startsWith("/login/oauth2/code/")) {
       filterChain.doFilter(request, response);
       return;
     }
@@ -104,10 +105,10 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
       Map<String, Object> payload = memberService.payload(accessToken);
 
       if (payload != null) {
-        Long id = (long) payload.get("id");
+        int id = (int) payload.get("id");
         String username = (String) payload.get("username");
         String name = (String) payload.get("name");
-        user = new User(id, username, name);
+        user = new User((long) id, username, name);
 
         isAccessTokenValid = true;
       }

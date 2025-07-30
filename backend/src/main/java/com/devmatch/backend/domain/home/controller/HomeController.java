@@ -23,10 +23,9 @@ public class HomeController {
             function logout() {
               fetch('/auth/logout', {
                 method: 'DELETE',
-                credentials: 'include'
               }).then(res => {
                 if (res.ok) {
-                  window.location.href = '/login';
+                  window.location.href = '/';
                 } else {
                   alert('로그아웃 실패');
                 }
