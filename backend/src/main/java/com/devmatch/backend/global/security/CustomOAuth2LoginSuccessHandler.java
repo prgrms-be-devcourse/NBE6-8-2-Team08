@@ -29,9 +29,11 @@ public class CustomOAuth2LoginSuccessHandler implements AuthenticationSuccessHan
       Authentication authentication) throws IOException, ServletException {
     User actor = rq.getActor();//CustomOAuth2UserService에서 리턴한 객체 소셜 로그인한 유저 정보를 가져오는거구나.
 
+    User user = userService.findById(actor.getId()).get();
+
     String accessToken = userService.genAccessToken(actor);
 
-    rq.setCookie("apiKey", actor.getApiKey());
+    rq.setCookie("apiKey", user.getApiKey());//DB에서 가져와야 한다.
     rq.setCookie("accessToken", accessToken);
 
     // ✅ 기본 리다이렉트 URL

@@ -57,26 +57,13 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
-    // 인증, 인가가 필요없는 API 요청이라면 패스
+    //인증, 인가가 필요없는 API 요청이라면 패스
     //여기까진 모든 필터에서 적용되는 부분. 로그인을 했냐 안했냐로 시점이 나뉨
     //로그인을 안했으면 이 밑으로는 진행이 안됨.
-    //이 부분은 삭제해도 될듯
-    if (List.of("/api/v1/members/login", "/api/v1/members/logout", "/api/v1/members/join")
-        .contains(request.getRequestURI())) {
+    //로그인 url로 요청 들어온거면 토큰 검사확인 불필요
+    if (List.of("/login/oauth/2", "/auth/logout").contains(request.getRequestURI())) {
       filterChain.doFilter(request, response);
       return;
-    }
-
-    //로그인 url로 요청 들어온거면 토큰 검사확인 불필요
-    if (request.getRequestURI().startsWith("/login/oauth/2")) {
-//      if(!rq.getActor().isAdmin()){
-//        response.setStatus(403);
-//        response.getWriter().write(Ut.json.toString(
-//            new RsData<>("403-1", "관리자만 접근할 수 있습니다.")));
-//        return;
-//      }
-//      filterChain.doFilter(request, response);
-//      return;
     }
 
     String apiKey;

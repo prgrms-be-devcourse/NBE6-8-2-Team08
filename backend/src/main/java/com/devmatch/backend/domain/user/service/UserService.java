@@ -72,7 +72,6 @@ public class UserService {
     return authTokenService.payload(accessToken);
   }
 
-  //이거 안쓰면 지울 예정
   public Optional<User> findById(Long id) {
     return userRepository.findById(id);
   }
