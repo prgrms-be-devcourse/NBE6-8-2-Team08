@@ -4,7 +4,6 @@ import com.devmatch.backend.domain.user.entity.User;
 import com.devmatch.backend.domain.user.repository.UserRepository;
 import com.devmatch.backend.exception.ServiceException;
 import com.devmatch.backend.global.RsData;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -23,13 +22,20 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
 
 
-  //이것도 rq로 할거니까 없어도 될듯
+  //이거는 타인의 id를 통해 타인을 가져올 때만 쓰셔야 합니다.
+  //로그인 한 사람의 정보를 가져오고 싶다면 Rq.getActor()를 사용하세요.
   @Transactional(readOnly = true)
   public User getUser(Long id) {
     return userRepository.findById(id).orElseThrow(() ->
         new NoSuchElementException("해당 ID 사용자가 없습니다. ID: " + id));
   }
 
+  @Transactional(readOnly = true)
+  public long count() {
+    return userRepository.count();
+  }
+
+  //테스트 계정 생성용
   public User join(String username, String password, String nickname) {
     return join(username, password, nickname, null);
   }
@@ -48,10 +54,12 @@ public class UserService {
     return userRepository.save(user);
   }
 
+  @Transactional(readOnly = true)
   public Optional<User> findByUsername(String username) {
     return userRepository.findByUsername(username);
   }
 
+  @Transactional(readOnly = true)
   public Optional<User> findByApiKey(String apiKey) {
     return userRepository.findByApiKey(apiKey);
   }
@@ -64,19 +72,9 @@ public class UserService {
     return authTokenService.payload(accessToken);
   }
 
+  //이거 안쓰면 지울 예정
   public Optional<User> findById(Long id) {
     return userRepository.findById(id);
-  }
-
-  public List<User> findAll() {
-    return userRepository.findAll();
-  }//이거 필요 없을지도
-
-  //이거 로그인 컨트롤러로 처리하던 버전에 쓰던거라 삭제할듯.
-  public void checkPassword(User user, String password) {//이거 필요 없을지도
-    if (!passwordEncoder.matches(password, user.getPassword())) {
-      throw new ServiceException("401-1", "비밀번호가 일치하지 않습니다.");
-    }
   }
 
   public RsData<User> modifyOrJoin(String username, String password, String nickname,

@@ -35,7 +35,7 @@ public class User {
   @Column(unique = true)
   @Size(min = 1, max = 50, message = "사용자 이름은 1자 이상 50자 이하이어야 합니다.")
   private String username;//기존 name 필드 대신 사용, 유니크한 사용자 이름
-  private String password;//필요 없을지도
+  private String password;
   private String nickname;//소셜 응답으로 올 정보
   @Column(unique = true)
   private String apiKey;//리프레시 토큰
@@ -63,11 +63,13 @@ public class User {
     this.nickname = name;
   }
 
+  //테스트 계정 생성용
   public void modifyApiKey(String apiKey) {//이거 더미데이터들 api키 이름이랑 똑같게 하려고 쓴거라 삭제할듯
     this.apiKey = apiKey;
-  }//필요 없음
+  }
 
-  public boolean isAdmin() {//필요 없을지도->그래도 나중에 비속어 사용한 글이 있으면 삭제하게 남겨두는 편이 좋다고 하심.
+  //그래도 나중에 비속어 사용한 글이 있으면 삭제하게 남겨두는 편이 좋다고 하심.
+  public boolean isAdmin() {
     if ("system".equals(username)) {
       return true;
     }
