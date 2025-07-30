@@ -21,7 +21,7 @@ public class Rq {
   private final HttpServletRequest req;
   private final HttpServletResponse resp;
 
-  public User getActor() {
+  public static User getActor() {
     // 현재 로그인한 사용자의 정보를 SecurityUser로 변환하여 User 객체로 반환
     // 만약 로그인하지 않았다면 null을 반환
     // SecurityContextHolder 에서 Authentication 객체를 가져오고, 그 안의 principal을 SecurityUser로 캐스팅
