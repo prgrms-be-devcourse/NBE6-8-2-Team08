@@ -1,5 +1,8 @@
+'use client';
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
+import { motion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -28,8 +31,27 @@ export interface BadgeProps
     VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {
+  // Extract conflicting props to avoid type conflicts with motion.div
+  const { 
+    children, 
+    onDrag: _onDrag, 
+    onDragStart: _onDragStart, 
+    onDragEnd: _onDragEnd,
+    onAnimationStart: _onAnimationStart,
+    onAnimationEnd: _onAnimationEnd,
+    ...safeProps 
+  } = props;
+  
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <motion.div 
+      className={cn(badgeVariants({ variant }), className)} 
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      {...safeProps} 
+    >
+      {children}
+    </motion.div>
   )
 }
 

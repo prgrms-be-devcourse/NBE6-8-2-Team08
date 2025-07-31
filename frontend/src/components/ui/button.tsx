@@ -1,6 +1,9 @@
+'use client';
+
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { motion } from 'framer-motion'
 
 import { cn } from '@/lib/utils'
 
@@ -45,15 +48,82 @@ function Button({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
   }) {
-  const Comp = asChild ? Slot : 'button'
+  const [ripples, setRipples] = React.useState<Array<{ x: number; y: number; id: number }>>([]);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (!buttonRef.current) return;
+    
+    const rect = buttonRef.current.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+    
+    const newRipple = { x, y, id: Date.now() };
+    setRipples(prev => [...prev, newRipple]);
+    
+    setTimeout(() => {
+      setRipples(prev => prev.filter(ripple => ripple.id !== newRipple.id));
+    }, 600);
+    
+    // Call original onClick handler
+    if (props.onClick) {
+      props.onClick(event);
+    }
+  };
 
+  if (asChild) {
+    return (
+      <Slot
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }), 'relative overflow-hidden')}
+        {...props}
+      >
+        {props.children}
+      </Slot>
+    );
+  }
+
+  // Extract conflicting props to avoid type conflicts with motion.button
+  const { 
+    onDrag: _onDrag, 
+    onDragStart: _onDragStart, 
+    onDragEnd: _onDragEnd,
+    onAnimationStart: _onAnimationStart,
+    onAnimationEnd: _onAnimationEnd,
+    ...safeProps 
+  } = props;
+  
   return (
-    <Comp
+    <motion.button
+      ref={buttonRef}
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
-  )
+      className={cn(buttonVariants({ variant, size, className }), 'relative overflow-hidden')}
+      whileTap={{ scale: 0.98 }}
+      onClick={handleClick}
+      {...safeProps}
+    >
+      {props.children}
+      {ripples.map(ripple => (
+        <motion.span
+          key={ripple.id}
+          className="absolute pointer-events-none"
+          initial={{ scale: 0, opacity: 0.5 }}
+          animate={{ scale: 4, opacity: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          style={{
+            left: ripple.x,
+            top: ripple.y,
+            width: '100px',
+            height: '100px',
+            borderRadius: '50%',
+            backgroundColor: variant === 'destructive' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.1)',
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+      ))}
+    </motion.button>
+  );
 }
 
 export { Button, buttonVariants }

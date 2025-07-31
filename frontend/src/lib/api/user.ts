@@ -3,7 +3,7 @@
 // ============================================
 
 import { apiClient } from './index';
-import { User, UserProjectListResponse, UserApplicationListResponse } from '@/types';
+import { User, UserProjectListResponse, ApplicationDetailResponseDto } from '@/types';
 
 // ============================================
 // 🎯 API 엔드포인트 상수들
@@ -18,18 +18,25 @@ const USERS_ENDPOINT = '/users';
 /**
  * 👤 현재 사용자 정보 조회
  * 
- * 📡 백엔드 API: GET /users/me
- * 🏠 컨트롤러: UserController.getMyInfo()
- * 📦 응답: User
+ * 📡 백엔드 API: GET /users/profile
+ * 🏠 컨트롤러: UserController.getCurrentUser()
+ * 📦 응답: User (래퍼 없음)
  */
-export const getCurrentUser = async (): Promise<User> => {
+export const getCurrentUser = async (): Promise<User | null> => {
   try {
-    const response = await apiClient.get('/users/me');
-    console.log('📤 [User API] 현재 사용자 정보 조회 요청');
-    return response.data.data;
+    const response = await apiClient.get('/users/profile');
+    console.log('📤 [User API] 사용자 프로필 조회 성공');
+    console.log('📥 [User API] 사용자 데이터:', response.data);
+    console.log('🔍 [User API] 백엔드 응답 전체 객체:', JSON.stringify(response.data, null, 2));
+    console.log('🔍 [User API] nickname 필드:', response.data.nickname);
+    console.log('🔍 [User API] nickName 필드:', response.data.nickName);
+    console.log('🔍 [User API] username 필드:', response.data.username);
+    
+    // 백엔드에서 User 엔티티를 직접 반환
+    return response.data;
   } catch (error) {
-    console.error('❌ [User API] 현재 사용자 정보 조회 실패:', error);
-    throw error;
+    console.error('❌ [User API] 사용자 프로필 조회 실패:', error);
+    return null;
   }
 };
 
@@ -54,35 +61,41 @@ export const logout = async (): Promise<void> => {
 /**
  * 📊 사용자의 프로젝트 목록 조회
  * 
- * 📡 백엔드 API: GET /users/{id}/projects
- * 🏠 컨트롤러: UserController.getProjects()
+ * 📡 백엔드 API: GET /users/projects
+ * 🏠 컨트롤러: UserController.findProjectsById()
  * 📦 응답: List<UserProjectListResponse>
  */
-export const getUserProjects = async (id: number): Promise<UserProjectListResponse[]> => {
+export const getUserProjects = async (): Promise<UserProjectListResponse[]> => {
   try {
-    const response = await apiClient.get(`${USERS_ENDPOINT}/${id}/projects`);
-    console.log(`📤 [User API] 사용자 프로젝트 목록 조회 요청 (ID: ${id})`);
-    return response.data.data;
+    const response = await apiClient.get(`${USERS_ENDPOINT}/projects`);
+    console.log('📤 [User API] 사용자 프로젝트 목록 조회 요청');
+    console.log('📥 [User API] 응답 데이터:', response.data);
+    
+    // 백엔드가 직접 배열로 응답하므로 response.data 사용
+    return response.data || [];
   } catch (error) {
-    console.error(`❌ [User API] 사용자 프로젝트 목록 조회 실패 (ID: ${id}):`, error);
-    throw error;
+    console.error('❌ [User API] 사용자 프로젝트 목록 조회 실패:', error);
+    return []; // 에러 시 빈 배열 반환
   }
 };
 
 /**
  * 📋 사용자의 지원서 목록 조회
  * 
- * 📡 백엔드 API: GET /users/{id}/applications
- * 🏠 컨트롤러: UserController.getApplications()
- * 📦 응답: List<UserApplicationListResponse>
+ * 📡 백엔드 API: GET /users/applications
+ * 🏠 컨트롤러: UserController.findApplicationsById()
+ * 📦 응답: ApplicationDetailResponseDto[] (래퍼 없음)
  */
-export const getUserApplications = async (id: number): Promise<UserApplicationListResponse[]> => {
+export const getUserApplications = async (): Promise<ApplicationDetailResponseDto[]> => {
   try {
-    const response = await apiClient.get(`${USERS_ENDPOINT}/${id}/applications`);
-    console.log(`📤 [User API] 사용자 지원서 목록 조회 요청 (ID: ${id})`);
-    return response.data.data;
+    const response = await apiClient.get(`${USERS_ENDPOINT}/applications`);
+    console.log('📤 [User API] 사용자 지원서 목록 조회 요청');
+    console.log('📥 [User API] 응답 데이터:', response.data);
+    
+    // 백엔드가 직접 ApplicationDetailResponseDto 배열로 응답
+    return response.data || [];
   } catch (error) {
-    console.error(`❌ [User API] 사용자 지원서 목록 조회 실패 (ID: ${id}):`, error);
-    throw error;
+    console.error('❌ [User API] 사용자 지원서 목록 조회 실패:', error);
+    return []; // 에러 시 빈 배열 반환
   }
 };

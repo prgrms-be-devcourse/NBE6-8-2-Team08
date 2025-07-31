@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record ProjectDetailResponse(
+    Long id,
     String title,
     String description,
     List<String> techStacks,

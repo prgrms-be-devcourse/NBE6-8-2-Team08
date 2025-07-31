@@ -65,7 +65,7 @@ public class Application {
   private List<SkillScore> skillScore = new ArrayList<>();
 
   // 하나의 지원서에 대해 하나의 '지원자-프로젝트 적합도' 분석 결과
-  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "analysis_result_id")
   private AnalysisResult analysisResult;
 
