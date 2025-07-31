@@ -1,6 +1,7 @@
 package com.devmatch.backend.global.rq;
 
 import com.devmatch.backend.domain.user.entity.User;
+import com.devmatch.backend.domain.user.service.UserService;
 import com.devmatch.backend.global.security.SecurityUser;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ public class Rq {
 
   private final HttpServletRequest req;
   private final HttpServletResponse resp;
+  private final UserService userService;
 
   public User getActor() {
     // 현재 로그인한 사용자의 정보를 SecurityUser로 변환하여 User 객체로 반환
@@ -101,4 +103,15 @@ public class Rq {
   public void sendRedirect(String url) {
     resp.sendRedirect(url);
   }
+
+  public User getActorFromDb() {
+    User actor = getActor();
+
+    if (actor == null) {
+      return null;
+    }
+
+    return userService.findById(actor.getId()).get();
+  }
+
 }
