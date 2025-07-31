@@ -1,4 +1,143 @@
-# 프로젝트 협업 규칙
+# DevMatch 🚀
+> **AI 기반 개발팀 매칭 플랫폼**  
+> 개발자와 프로젝트를 지능적으로 연결하는 차세대 협업 솔루션
+
+[![Deploy Status](https://img.shields.io/badge/Deploy-Live-brightgreen)](https://nbe-6-8-2-team08-vaug.vercel.app)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-brightgreen)](https://spring.io/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.4-black)](https://nextjs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-blue)](https://neon.tech/)
+
+## 🎯 프로젝트 개요
+
+**DevMatch**는 개발자의 기술 스택과 프로젝트 요구사항을 AI로 분석하여 최적의 매칭을 제공하는 플랫폼입니다. 
+단순한 매칭을 넘어 **팀 구성의 효율성과 프로젝트 성공률을 극대화**하는 것이 목표입니다.
+
+### ✨ 핵심 기능
+
+- **🤖 AI 기반 매칭**: Spring AI + OpenAI를 활용한 지능형 개발자-프로젝트 매칭
+- **📊 실시간 분석**: 지원자 기술 스택과 프로젝트 적합도 실시간 분석
+- **🔐 소셜 인증**: Google, Kakao, Naver 통합 OAuth2 인증
+- **📱 반응형 UI**: 모든 디바이스에서 최적화된 사용자 경험
+- **⚡ 실시간 업데이트**: 프로젝트 상태와 지원 현황 실시간 동기화
+
+## 🛠️ 기술 스택
+
+### **Frontend**
+- **Framework**: Next.js 15.4.3 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Animation**: Framer Motion
+- **UI Components**: Radix UI
+- **State Management**: React Context API
+- **HTTP Client**: Axios
+
+### **Backend**
+- **Framework**: Spring Boot 3.5.3
+- **Language**: Java 21
+- **Security**: Spring Security + JWT
+- **AI Integration**: Spring AI + OpenAI
+- **Database**: PostgreSQL (Neon)
+- **ORM**: Spring Data JPA
+- **Authentication**: OAuth2 (Google, Kakao, Naver)
+
+### **Infrastructure & DevOps**
+- **Frontend Deploy**: Vercel
+- **Backend Deploy**: AWS Lightsail
+- **Database**: PostgreSQL on Neon
+- **Version Control**: Git + GitHub
+- **CI/CD**: GitHub Actions
+
+## 🏗️ 아키텍처
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │    Backend      │    │   Database      │
+│   (Vercel)      │────│ (AWS Lightsail) │────│ (Neon PostgreSQL)│
+│                 │    │                 │    │                 │
+│ • Next.js 15    │    │ • Spring Boot   │    │ • PostgreSQL    │
+│ • TypeScript    │    │ • Spring AI     │    │ • Connection    │
+│ • Tailwind CSS  │    │ • JWT Security  │    │   Pool          │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+## 🚀 실행 방법
+
+### 사전 요구사항
+- Node.js 18+
+- Java 21+
+- PostgreSQL
+
+### Frontend 실행
+```bash
+cd frontend
+npm install
+npm run dev
+```
+🌐 http://localhost:3000
+
+### Backend 실행
+```bash
+cd backend
+# 환경변수 설정 (.env.default 참고)
+./gradlew bootRun
+```
+🌐 http://localhost:8080
+
+## 📁 프로젝트 구조
+
+```
+NBE6-8-2-Team08/
+├── frontend/
+│   ├── src/
+│   │   ├── app/                 # Next.js App Router
+│   │   ├── components/          # 재사용 가능한 컴포넌트
+│   │   ├── lib/                 # API 클라이언트 및 유틸리티
+│   │   ├── contexts/            # React Context
+│   │   └── types/               # TypeScript 타입 정의
+│   └── public/                  # 정적 파일
+└── backend/
+    └── src/main/java/com/devmatch/backend/
+        ├── domain/              # 도메인별 패키지
+        │   ├── analysis/        # AI 분석 기능
+        │   ├── application/     # 지원 관리
+        │   ├── auth/           # 인증/인가
+        │   ├── project/        # 프로젝트 관리
+        │   └── user/           # 사용자 관리
+        └── global/             # 공통 설정 및 유틸리티
+```
+
+## 🔧 주요 구현 사항
+
+### AI 매칭 알고리즘
+- **기술 스택 분석**: 지원자의 기술 스택과 프로젝트 요구사항 비교
+- **적합도 스코어링**: 다차원 분석을 통한 정량적 매칭 점수
+- **실시간 추천**: 프로젝트별 최적 지원자 실시간 추천
+
+### 보안 및 인증
+- **JWT 기반 인증**: 무상태 토큰 기반 보안
+- **OAuth2 통합**: 소셜 로그인 원클릭 지원
+- **CORS 설정**: 프론트엔드-백엔드 안전한 통신
+
+### 성능 최적화
+- **코드 스플리팅**: Next.js 자동 번들 최적화
+- **이미지 최적화**: Next.js Image 컴포넌트 활용
+- **API 응답 캐싱**: 효율적인 데이터 로딩
+
+## 🌐 배포 정보
+
+- **🎨 Frontend**: [https://nbe-6-8-2-team08-vaug.vercel.app](https://nbe-6-8-2-team08-vaug.vercel.app)
+- **⚙️ Backend API**: 배포 완료 후 업데이트 예정
+
+## 🤝 개발팀
+
+**8팀 - DevMatch 개발팀**
+- 전체 팀원이 Frontend, Backend 개발에 참여
+- 페어 프로그래밍 및 코드 리뷰 활성화
+- Git Flow 기반 협업 및 이슈 관리
+
+---
+
+# 개발 가이드 📋
 
 ## 브랜치 전략
 브랜치 명은 크게 세 부분으로 나누어 구분하기
