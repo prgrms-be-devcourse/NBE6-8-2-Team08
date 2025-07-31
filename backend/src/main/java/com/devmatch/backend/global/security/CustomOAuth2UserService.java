@@ -80,7 +80,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         user.getId(),
         user.getUsername(),
         user.getPassword(),
-        user.getUsername(),
+        user.getNickName(),
         user.getAuthorities()
     ); //-> 석세스 핸들러 호출
   }
