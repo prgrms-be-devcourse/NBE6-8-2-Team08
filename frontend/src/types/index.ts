@@ -1,27 +1,14 @@
 // ============================================
-// 📦 공통 응답 타입 (백엔드 ApiResponse와 100% 동기화)
+// 📦 공통 응답 타입 (백엔드 실제 구조 기준)
 // ============================================
 
 /**
- * 📡 백엔드 공통 응답 형식
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/global/ApiResponse.java
- * 🎯 목적: 모든 API 응답에 일관된 형식 적용
- * 📦 구조: { msg: string, data: T }
- * 
- * 📝 예시:
- * {
- *   "msg": "프로젝트 생성 성공",           // ✅ 메시지
- *   "data": {                           // ✅ 실제 데이터 (제네릭)
- *     "id": 1,
- *     "title": "새 프로젝트",
- *     ...
- *   }
- * }
+ * 백엔드 ApiResponse 래퍼
+ * 위치: backend/src/main/java/com/devmatch/backend/global/ApiResponse.java
  */
 export interface ApiResponse<T> {
-  msg: string;  // ✅ 응답 메시지 (성공/실패 여부)
-  data: T;      // ✅ 실제 응답 데이터 (제네릭 타입)
+  msg: string;
+  data: T;
 }
 
 // ============================================
@@ -29,171 +16,113 @@ export interface ApiResponse<T> {
 // ============================================
 
 /**
- * 👤 사용자 기본 정보
+ * 사용자 프로필 응답 (OAuth 기반 사용자 정보)
  * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/user/entity/User.java
- * 🎯 목적: 사용자 식별 및 기본 정보 제공
+ * 📍 OAuth 플로우: Google/Kakao/Naver → CustomOAuth2UserService → User 엔티티 생성
+ * 🔑 실제 OAuth 응답 필드 기준:
+ *    - KAKAO: properties.nickname, properties.profile_image
+ *    - GOOGLE: name/given_name, picture  
+ *    - NAVER: response.nickname, response.profile_image
+ * 📡 연관 API: GET /users/profile
  */
 export interface User {
-  id: number;           // ✅ 사용자 고유 ID (PK)
-  username: string;     // ✅ 사용자 아이디 (OAuth 제공자별 고유값)
-  nickname: string;     // ✅ 사용자 닉네임 (표시용)
-  profileImgUrl: string; // ✅ 프로필 이미지 URL
+  id: number;                    // Long -> number (PK)
+  username: string;              // "{PROVIDER}__{oauthUserId}" 형식 (예: "GOOGLE__1234567890")
+  nickName: string;              // OAuth 제공자에서 받은 표시명 (백엔드 getNickName() 메서드명 기준)
+  profileImgUrl: string | null;  // OAuth 제공자에서 받은 프로필 이미지 URL
+  password: string | null;       // 백엔드에서 전송되는 필드 (보안상 null)
+  apiKey: string | null;         // 백엔드에서 전송되는 필드 (보안상 null)
+  authorities: string[];         // 백엔드에서 전송되는 권한 배열 (예: ["ROLE_ADMIN"])
+  admin: boolean;                // 관리자 여부
 }
 
+
+
 // ============================================
-// 📊 프로젝트 관련 타입들 (백엔드 Project 엔티티와 100% 동기화)
+// 📊 프로젝트 관련 타입들
 // ============================================
 
 /**
- * 📋 프로젝트 상태 열거형
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/project/entity/ProjectStatus.java
- * 🎯 목적: 프로젝트 진행 상태 표준화
+ * 프로젝트 상태 (백엔드 실제 enum)
+ * 위치: backend/src/main/java/com/devmatch/backend/domain/project/entity/ProjectStatus.java
+ * 주의: IN_PROGRESS는 백엔드에 존재하지 않음
  */
-export type ProjectStatus = 'RECRUITING' | 'IN_PROGRESS' | 'COMPLETED';
+export type ProjectStatus = 'RECRUITING' | 'COMPLETED';
 
 /**
- * 📋 프로젝트 상세 정보 응답
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/project/dto/ProjectDetailResponse.java
- * 🎯 목적: 프로젝트 조회 시 사용 (단일/목록 조회 모두 사용)
- * 📡 연관 API: GET /projects, GET /projects/{id}, GET /users/{id}/projects
+ * 프로젝트 상세 응답 (백엔드 실제 구조)
+ * 위치: backend/src/main/java/com/devmatch/backend/domain/project/dto/ProjectDetailResponse.java
  */
 export interface ProjectDetailResponse {
-  id: number;              // ✅ 프로젝트 고유 ID (PK)
-  title: string;           // ✅ 프로젝트 제목
-  description: string;     // ✅ 프로젝트 설명
-  techStacks: string[];    // ✅ 기술 스택 목록 (쉼표 구분자로 파싱)
-  teamSize: number;        // ✅ 목표 팀원 수
-  currentTeamSize: number; // ✅ 현재 팀원 수
-  creator: {
-    id: number;
-    username: string;
-    nickname: string;
-    profileImgUrl: string;
-  };         // ✅ 생성자 정보
-  status: ProjectStatus;   // ✅ 프로젝트 상태
-  content: string;         // ✅ 프로젝트 상세 내용
-  createdAt: string;       // ✅ 생성일시 (ISO 8601)
-  durationWeeks: number;   // ✅ 예상 진행 기간 (주 단위)
+  id: number;
+  title: string;
+  description: string;
+  techStacks: string[];        // 배열로 반환
+  teamSize: number;
+  currentTeamSize: number;     // 현재 팀원 수
+  creator: string;             // 프로젝트 생성자 닉네임
+  status: ProjectStatus;       // "RECRUITING" | "COMPLETED"
+  content: string | null;      // 역할 배분 내용 (null 가능)
+  durationWeeks: number;
+  createdAt: string;           // LocalDateTime이 ISO 문자열로 변환
 }
 
 /**
- * ➕ 프로젝트 생성 요청
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/project/dto/ProjectCreateRequest.java
- * 🎯 목적: 프로젝트 생성 시 사용
- * 📡 연관 API: POST /projects
+ * 프로젝트 생성 요청 (백엔드 실제 구조)
+ * 위치: backend/src/main/java/com/devmatch/backend/domain/project/dto/ProjectCreateRequest.java
  */
 export interface ProjectCreateRequest {
-  userId: number;       // ✅ 생성자 사용자 ID
-  title: string;        // ✅ 프로젝트 제목
-  description: string;  // ✅ 프로젝트 설명
-  techStack: string;    // ✅ 기술 스택 (쉼표 구분자 문자열)
-  teamSize: number;     // ✅ 목표 팀원 수
-  durationWeeks: number; // ✅ 예상 진행 기간 (주 단위)
+  title: string;          // 1-200자
+  description: string;    // 1-2000자  
+  techStack: string;      // 1-500자 (쉼표로 구분된 문자열)
+  teamSize: number;       // 최소 1
+  durationWeeks: number;  // 최소 1
 }
 
 /**
- * 🔄 프로젝트 상태 변경 요청
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/project/dto/ProjectStatusUpdateRequest.java
- * 🎯 목적: 프로젝트 상태 변경 시 사용
- * 📡 연관 API: PATCH /projects/{id}/status
+ * 프로젝트 상태 수정 요청 (백엔드 실제 구조)
+ * 위치: backend/src/main/java/com/devmatch/backend/domain/project/dto/ProjectStatusUpdateRequest.java
  */
 export interface ProjectStatusUpdateRequest {
-  status: ProjectStatus; // ✅ 변경할 프로젝트 상태
+  status: ProjectStatus;
 }
 
 /**
- * 🔄 프로젝트 내용 변경 요청
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/project/dto/ProjectContentUpdateRequest.java
- * 🎯 목적: 프로젝트 상세 내용 변경 시 사용
- * 📡 연관 API: PATCH /projects/{id}/content
+ * 프로젝트 내용 수정 요청 (백엔드 실제 구조)
+ * 위치: backend/src/main/java/com/devmatch/backend/domain/project/dto/ProjectContentUpdateRequest.java
  */
 export interface ProjectContentUpdateRequest {
-  content: string; // ✅ 변경할 프로젝트 상세 내용
+  content: string;  // 1-2000자
 }
 
 // ============================================
-// 📋 지원서 관련 타입들 (백엔드 Application 엔티티와 100% 동기화)
+// 📋 지원서 관련 타입들
 // ============================================
 
 /**
- * 📋 지원서 상태 열거형
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/application/entity/ApplicationStatus.java
- * 🎯 목적: 지원서 처리 상태 표준화
+ * 지원서 상태 (백엔드 실제 enum)
+ * 위치: backend/src/main/java/com/devmatch/backend/domain/application/enums/ApplicationStatus.java
  */
 export type ApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 /**
- * 📋 사용자의 지원서 목록 응답
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/user/dto/UserApplicationListResponse.java
- * 🎯 목적: 사용자의 지원서 목록 조회 시 사용
- * 📡 연관 API: GET /users/{id}/applications
+ * 지원서 상세 응답 (백엔드 실제 구조)
+ * 위치: backend/src/main/java/com/devmatch/backend/domain/application/dto/response/ApplicationDetailResponseDto.java
  */
-export interface UserApplicationListResponse {
-  applicationId: number;        // ✅ 지원서 고유 ID
-  user: User;                   // ✅ 지원자 정보
-  status: ApplicationStatus;    // ✅ 지원서 상태
-  appliedAt: string;            // ✅ 지원일시 (ISO 8601)
+export interface ApplicationDetailResponseDto {
+  applicationId: number;      // 지원서 ID
+  nickname: string;          // 지원자 닉네임 (직접 필드)
+  status: ApplicationStatus; // 지원서 상태
+  appliedAt: string;         // 지원 일시 (ISO 문자열)
 }
 
 /**
- * 📋 프로젝트의 지원서 목록 응답
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/project/dto/ProjectApplicationListResponse.java
- * 🎯 목적: 프로젝트의 지원서 목록 조회 시 사용
- * 📡 연관 API: GET /projects/{id}/applications
- */
-export interface ProjectApplicationListResponse {
-  applicationId: number;        // ✅ 지원서 고유 ID
-  user: User;                   // ✅ 지원자 정보
-  status: ApplicationStatus;    // ✅ 지원서 상태
-  appliedAt: string;            // ✅ 지원일시 (ISO 8601)
-}
-
-/**
- * ➕ 프로젝트 지원 요청
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/project/dto/ProjectApplyRequest.java
- * 🎯 목적: 프로젝트 지원 시 사용
- * 📡 연관 API: POST /projects/{id}/applications
+ * 프로젝트 지원 요청 (백엔드 실제 구조)
+ * 위치: backend/src/main/java/com/devmatch/backend/domain/project/dto/ProjectApplyRequest.java
  */
 export interface ProjectApplyRequest {
-  userId: number;       // ✅ 지원자 사용자 ID
-  techStacks: string;   // ✅ 지원자의 기술 스택 (쉼표 구분자 문자열)
-  techScores: number[]; // ✅ 기술별 점수 배열
-}
-
-
-/**
- * 📋 지원서 상세 정보 응답
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/application/dto/ApplicationDetailResponse.java
- * 🎯 목적: 지원서 상세 조회 시 사용
- * 📡 연관 API: GET /applications/{id}
- */
-export interface ApplicationDetailResponse {
-  applicationId: number;        // ✅ 지원서 고유 ID
-  user: User;                   // ✅ 지원자 정보
-  status: ApplicationStatus;    // ✅ 지원서 상태
-  appliedAt: string;            // ✅ 지원일시 (ISO 8601)
-}
-
-/**
- * 🔄 지원서 상태 변경 요청
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/application/dto/ApplicationStatusUpdateRequest.java
- * 🎯 목적: 지원서 상태 변경 시 사용
- * 📡 연관 API: PATCH /applications/{id}/status
- */
-export interface ApplicationStatusUpdateRequest {
-  status: ApplicationStatus; // ✅ 변경할 지원서 상태
+  techStacks: string[];   // 기술 스택 배열
+  techScores: number[];   // 각 기술에 대한 점수 배열
 }
 
 // ============================================
@@ -205,44 +134,15 @@ export interface ApplicationStatusUpdateRequest {
  * 
  * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/analysis/dto/AnalysisResultResponse.java
  * 🎯 목적: 지원서 분석 결과 조회 시 사용
- * 📡 연관 API: GET /analysis/{id}
+ * 📡 연관 API: GET /analysis/application/{applicationId}
  */
 export interface AnalysisResultResponse {
-  analysisId: number;           // ✅ 분석 고유 ID
+  id: number;                   // ✅ 분석 고유 ID
   applicationId: number;        // ✅ 분석 대상 지원서 ID
-  compatibilityScore: number;   // ✅ 적합도 점수 (0-100)
-  recommendedRole: string;      // ✅ 추천 역할
-  strengths: string[];          // ✅ 강점 목록
-  weaknesses: string[];         // ✅ 약점 목록
-  createdAt: string;            // ✅ 분석일시 (ISO 8601)
+  compatibilityScore: number;   // ✅ 적합도 점수 (0-100, BigDecimal)
+  compatibilityReason: string;  // ✅ 적합도 이유/설명
 }
 
-/**
- * 🔄 팀 역할 할당 요청
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/analysis/dto/TeamRoleAssignmentRequest.java
- * 🎯 목적: 팀원 역할 할당 시 사용
- * 📡 연관 API: POST /analysis/assign-roles
- */
-export interface TeamRoleAssignmentRequest {
-  projectId: number;   // ✅ 프로젝트 ID
-  userIds: number[];   // ✅ 역할 할당 대상 사용자 ID 배열
-}
-
-/**
- * 📋 팀 역할 할당 응답
- * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/analysis/dto/TeamRoleAssignmentResponse.java
- * 🎯 목적: 팀원 역할 할당 결과 조회 시 사용
- * 📡 연관 API: POST /analysis/assign-roles
- */
-export interface TeamRoleAssignmentResponse {
-  assignments: Array<{  // ✅ 역할 할당 결과 목록
-    userId: number;     // ✅ 사용자 ID
-    role: string;       // ✅ 할당된 역할
-  }>;
-  projectId: number;    // ✅ 프로젝트 ID
-}
 
 // ============================================
 // 📦 사용자 정의 타입들
@@ -251,12 +151,11 @@ export interface TeamRoleAssignmentResponse {
 /**
  * 👤 사용자의 프로젝트 목록 응답
  * 
- * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/user/dto/UserProjectListResponse.java
+ * 📍 위치: backend/src/main/java/com/devmatch/backend/domain/project/dto/ProjectDetailResponse.java
  * 🎯 목적: 사용자의 프로젝트 목록 조회 시 사용
- * 📡 연관 API: GET /users/{id}/projects
+ * 📡 연관 API: GET /users/projects
  * 
- * 📝 ProjectDetailResponse와 필드가 거의 동일하지만
- *    엔티티 분리와 확장성을 위해 별도 정의
+ * 📝 ProjectDetailResponse와 동일한 구조
  */
 export interface UserProjectListResponse {
   id: number;              // ✅ 프로젝트 고유 ID (PK)
@@ -265,14 +164,9 @@ export interface UserProjectListResponse {
   techStacks: string[];    // ✅ 기술 스택 목록 (쉼표 구분자로 파싱)
   teamSize: number;        // ✅ 목표 팀원 수
   currentTeamSize: number; // ✅ 현재 팀원 수
-  creator: {
-    id: number;
-    username: string;
-    nickname: string;
-    profileImgUrl: string;
-  };         // ✅ 생성자 정보
+  creator: string;         // ✅ 생성자 정보
   status: ProjectStatus;   // ✅ 프로젝트 상태
-  content: string;         // ✅ 프로젝트 상세 내용
+  content: string | null;  // ✅ 프로젝트 상세 내용 (역할 배분, null 가능)
   createdAt: string;       // ✅ 생성일시 (ISO 8601)
   durationWeeks: number;   // ✅ 예상 진행 기간 (주 단위)
 }

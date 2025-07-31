@@ -27,8 +27,7 @@ public class AnalysisResult {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @OneToOne
-  @JoinColumn(name = "application_id", nullable = false)
+  @OneToOne(mappedBy = "analysisResult")
   private Application application;
 
   @Column(name = "compatibility_score", precision = 5, scale = 2, nullable = false)

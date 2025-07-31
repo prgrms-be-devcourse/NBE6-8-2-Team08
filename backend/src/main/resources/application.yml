@@ -54,10 +54,10 @@ spring:
   ai:
     openai:
       base-url: https://api.groq.com/openai
-      api-key: ${GROQ_API_KEY:ON_SECRET}
+      api-key: ${spring.ai.openai.api-key}
       chat:
         options:
-          model: meta-llama/llama-4-scout-17b-16e-instruct
+          model: meta-llama/llama-4-maverick-17b-128e-instruct
           temperature: 0
 custom:
   jwt:

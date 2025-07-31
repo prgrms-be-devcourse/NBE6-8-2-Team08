@@ -1,17 +1,19 @@
-# DevMatch API 명세서 (최신 버전)
+# API Documentation (백엔드 실제 응답 기준)
 
-## 개요
-DevMatch는 개발자 프로젝트 매칭 플랫폼으로, 프로젝트 생성, 지원서 관리, 적합도 분석 기능을 제공합니다.
+이 문서는 **백엔드에서 실제로 프론트엔드에게 전달하는 데이터 구조**를 기반으로 작성되었습니다.
 
-## 공통 응답 형식
-모든 API는 다음과 같은 공통 응답 형식을 사용합니다:
+## 공통 응답 구조
 
-```json
-{
-  "msg": "성공/실패 메시지",
-  "data": "실제 데이터 (선택적)"
+대부분의 API는 `ApiResponse<T>` 래퍼로 감싸져서 응답됩니다:
+
+```typescript
+interface ApiResponse<T> {
+  msg: string;      // 응답 메시지
+  data: T;          // 실제 데이터
 }
 ```
+
+**예외**: 일부 엔드포인트는 데이터를 직접 반환합니다 (래퍼 없음).
 
 ## 베이스 URL
 ```
@@ -42,8 +44,6 @@ DELETE /auth/logout
 **응답:**
 ```json
 {
-  "resultCode": "200-1",
-  "statusCode": 200,
   "msg": "로그아웃 되었습니다.",
   "data": null
 }
@@ -51,62 +51,24 @@ DELETE /auth/logout
 
 ### 2. 사용자 (User) API
 
-#### 2.1 사용자의 프로젝트 목록 조회
+#### 2.1 현재 사용자 프로필 조회
 ```
-GET /users/{id}/projects
+GET /users/profile
 ```
+- **Response**: `User` (래퍼 없음)
 
-**경로 매개변수:**
-- `id` (long): 사용자 ID
-
-**응답:**
-```json
-{
-  "msg": "프로젝트 전체 조회 성공",
-  "data": [
-    {
-      "id": 1,
-      "title": "프로젝트 제목",
-      "description": "프로젝트 설명",
-      "techStacks": ["Java", "Spring", "React"],
-      "teamSize": 4,
-      "currentTeamSize": 2,
-      "creator": "생성자명",
-      "status": "RECRUITING",
-      "content": "프로젝트 내용",
-      "createdAt": "2024-01-01T10:00:00"
-    }
-  ]
-}
+#### 2.2 내가 생성한 프로젝트 목록
 ```
-
-#### 2.2 사용자의 지원서 목록 조회
+GET /users/projects  
 ```
-GET /users/{id}/applications
-```
+- **Response**: `ProjectDetailResponse[]` (래퍼 없음)
 
-**경로 매개변수:**
-- `id` (long): 사용자 ID
-
-**응답:**
-```json
-{
-  "msg": "조회 성공",
-  "data": [
-    {
-      "applicationId": 1,
-      "user": {
-        "id": 1,
-        "username": "사용자아이디",
-        "nickname": "사용자닉네임",
-        "profileImgUrl": "프로필이미지URL"
-      },
-      "status": "PENDING",
-      "appliedAt": "2024-01-01T10:00:00"
-    }
-  ]
-}
+#### 2.3 내가 지원한 프로젝트 목록
 ```
+GET /users/applications
+```
+- **Response**: `ApplicationDetailResponseDto[]` (래퍼 없음)
+
 
 ### 3. 프로젝트 (Project) API
 
@@ -114,242 +76,82 @@ GET /users/{id}/applications
 ```
 POST /projects
 ```
-
-**요청 본문:**
-```json
-{
-  "userId": 1,
-  "title": "프로젝트 제목",
-  "description": "프로젝트 설명",
-  "techStack": "Java,Spring,React",
-  "teamSize": 4,
-  "durationWeeks": 12
+- **Request Body**:
+```typescript
+interface ProjectCreateRequest {
+  title: string;          // 1-200자
+  description: string;    // 1-2000자  
+  techStack: string;      // 1-500자 (쉼표로 구분된 문자열)
+  teamSize: number;       // 최소 1
+  durationWeeks: number;  // 최소 1
 }
 ```
-
-**유효성 검사:**
-- `userId`: 필수, 최소 1
-- `title`: 1-200자 필수
-- `description`: 1-2000자 필수
-- `techStack`: 1-500자 필수
-- `teamSize`: 최소 1
-- `durationWeeks`: 최소 1
-
-**응답:**
-```json
-{
-  "msg": "프로젝트 생성 성공",
-  "data": {
-    "id": 1,
-    "title": "프로젝트 제목",
-    "description": "프로젝트 설명",
-    "techStacks": ["Java", "Spring", "React"],
-    "teamSize": 4,
-    "currentTeamSize": 0,
-    "creator": "생성자명",
-    "status": "RECRUITING",
-    "content": "",
-    "createdAt": "2024-01-01T10:00:00"
-  }
-}
-```
+- **Response**: `ApiResponse<ProjectDetailResponse>`
 
 #### 3.2 프로젝트 전체 조회
 ```
 GET /projects
 ```
-
-**응답:**
-```json
-{
-  "msg": "프로젝트 전체 조회 성공",
-  "data": [
-    {
-      "id": 1,
-      "title": "프로젝트 제목",
-      "description": "프로젝트 설명",
-      "techStacks": ["Java", "Spring", "React"],
-      "teamSize": 4,
-      "currentTeamSize": 2,
-      "creator": "생성자명",
-      "status": "RECRUITING",
-      "content": "프로젝트 내용",
-      "createdAt": "2024-01-01T10:00:00"
-    }
-  ]
-}
-```
+- **Response**: `ApiResponse<ProjectDetailResponse[]>`
 
 #### 3.3 프로젝트 단일 조회
 ```
 GET /projects/{id}
 ```
-
-**경로 매개변수:**
-- `id` (long): 프로젝트 ID
-
-**응답:**
-```json
-{
-  "msg": "프로젝트 단일 조회 성공",
-  "data": {
-    "id": 1,
-    "title": "프로젝트 제목",
-    "description": "프로젝트 설명",
-    "techStacks": ["Java", "Spring", "React"],
-    "teamSize": 4,
-    "currentTeamSize": 2,
-    "creator": "생성자명",
-    "status": "RECRUITING",
-    "content": "프로젝트 내용",
-    "createdAt": "2024-01-01T10:00:00"
-  }
-}
-```
+- **Response**: `ApiResponse<ProjectDetailResponse>`
 
 #### 3.4 프로젝트 상태 수정
 ```
 PATCH /projects/{id}/status
 ```
-
-**경로 매개변수:**
-- `id` (long): 프로젝트 ID
-
-**요청 본문:**
-```json
-{
-  "status": "COMPLETED"
+- **Request Body**:
+```typescript
+interface ProjectStatusUpdateRequest {
+  status: ProjectStatus;
 }
-```
 
-**응답:**
-```json
-{
-  "msg": "프로젝트 상태 수정 성공",
-  "data": {
-    "id": 1,
-    "title": "프로젝트 제목",
-    "description": "프로젝트 설명",
-    "techStacks": ["Java", "Spring", "React"],
-    "teamSize": 4,
-    "currentTeamSize": 2,
-    "creator": "생성자명",
-    "status": "COMPLETED",
-    "content": "프로젝트 내용",
-    "createdAt": "2024-01-01T10:00:00"
-  }
-}
+type ProjectStatus = "RECRUITING" | "COMPLETED";
+// 주의: IN_PROGRESS는 백엔드에 존재하지 않음
 ```
+- **Response**: `ApiResponse<ProjectDetailResponse>`
 
-#### 3.5 프로젝트 내용 수정
+#### 3.5 프로젝트 내용 수정 (역할 배분)
 ```
 PATCH /projects/{id}/content
 ```
-
-**경로 매개변수:**
-- `id` (long): 프로젝트 ID
-
-**요청 본문:**
-```json
-{
-  "content": "수정된 프로젝트 내용"
+- **Request Body**:
+```typescript
+interface ProjectContentUpdateRequest {
+  content: string;  // 1-2000자
 }
 ```
-
-**응답:**
-```json
-{
-  "msg": "역할 배분 내용 수정 성공",
-  "data": {
-    "id": 1,
-    "title": "프로젝트 제목",
-    "description": "프로젝트 설명",
-    "techStacks": ["Java", "Spring", "React"],
-    "teamSize": 4,
-    "currentTeamSize": 2,
-    "creator": "생성자명",
-    "status": "RECRUITING",
-    "content": "수정된 프로젝트 내용",
-    "createdAt": "2024-01-01T10:00:00"
-  }
-}
-```
+- **Response**: `ApiResponse<ProjectDetailResponse>`
 
 #### 3.6 프로젝트 삭제
 ```
 DELETE /projects/{id}
 ```
+- **Response**: `204 No Content` (응답 본문 없음)
 
-**경로 매개변수:**
-- `id` (long): 프로젝트 ID
-
-**응답:**
-```
-HTTP/1.1 204 No Content
-```
-
-#### 3.7 프로젝트의 지원서 전체 목록 조회
+#### 3.7 프로젝트 지원서 목록 조회
 ```
 GET /projects/{id}/applications
 ```
+- **Response**: `ApiResponse<ApplicationDetailResponseDto[]>`
 
-**경로 매개변수:**
-- `id` (long): 프로젝트 ID
-
-**응답:**
-```json
-{
-  "msg": "프로젝트의 지원서 전체 목록 조회 성공",
-  "data": [
-    {
-      "applicationId": 1,
-      "user": {
-        "id": 1,
-        "username": "사용자아이디",
-        "nickname": "사용자닉네임",
-        "profileImgUrl": "프로필이미지URL"
-      },
-      "status": "PENDING",
-      "appliedAt": "2024-01-01T10:00:00"
-    }
-  ]
-}
-```
-
-#### 3.8 프로젝트에 지원
+#### 3.8 프로젝트 지원
 ```
 POST /projects/{id}/applications
 ```
-
-**경로 매개변수:**
-- `id` (long): 프로젝트 ID
-
-**요청 본문:**
-```json
-{
-  "userId": 1,
-  "techStacks": ["Java", "Spring"],
-  "techScores": [8, 7]
+- **Request Body**:
+```typescript
+interface ProjectApplyRequest {
+  techStacks: string[];   // 기술 스택 배열
+  techScores: number[];   // 각 기술에 대한 점수 배열
 }
 ```
+- **Response**: `ApiResponse<ApplicationDetailResponseDto>`
 
-**응답:**
-```json
-{
-  "msg": "지원서 작성 성공",
-  "data": {
-    "applicationId": 1,
-    "user": {
-      "id": 1,
-      "username": "사용자아이디",
-      "nickname": "사용자닉네임",
-      "profileImgUrl": "프로필이미지URL"
-    },
-    "status": "PENDING",
-    "appliedAt": "2024-01-01T10:00:00"
-  }
-}
-```
 
 ### 4. 지원서 (Application) API
 
@@ -368,16 +170,14 @@ GET /applications/{id}
   "data": {
     "applicationId": 1,
     "user": {
-      "id": 1,
-      "username": "사용자아이디",
-      "nickname": "사용자닉네임",
-      "profileImgUrl": "프로필이미지URL"
+      "nickName": "홍길동"
     },
     "status": "PENDING",
     "appliedAt": "2024-01-01T10:00:00"
   }
 }
 ```
+
 
 #### 4.2 지원서 삭제
 ```
@@ -418,205 +218,106 @@ PATCH /applications/{id}/status
 }
 ```
 
-### 5. 분석 (Analysis) API
+### 4. 분석 (Analysis) API
 
-#### 5.1 지원서 분석 결과 조회
+#### 4.1 지원서 분석 결과 조회
 ```
 GET /analysis/application/{applicationId}
 ```
+- **Response**: `ApiResponse<AnalysisResultResponse>`
 
-**경로 매개변수:**
-- `applicationId` (long): 지원서 ID
-
-**응답:**
-```json
-{
-  "msg": "조회 성공",
-  "data": {
-    "id": 1,
-    "applicationId": 1,
-    "compatibilityScore": 75.50,
-    "compatibilityReason": "React 우수하나 백엔드 부족"
-  }
-}
-```
-
-#### 5.2 지원서 분석 결과 생성
+#### 4.2 지원서 분석 결과 생성
 ```
 POST /analysis/application/{applicationId}
 ```
+- **Response**: `ApiResponse<AnalysisResultResponse>`
 
-**경로 매개변수:**
-- `applicationId` (long): 지원서 ID
-
-**응답:**
-```json
-{
-  "msg": "분석 결과 생성 성공",
-  "data": {
-    "id": 1,
-    "applicationId": 1,
-    "compatibilityScore": 75.50,
-    "compatibilityReason": "React 우수하나 백엔드 부족"
-  }
-}
-```
-
-#### 5.3 프로젝트 팀 역할 분배
+#### 4.3 팀 역할 분배 생성
 ```
 POST /analysis/project/{projectId}/role-assignment
 ```
+- **Response**: `ApiResponse<string>` (역할 분배 문자열)
 
-**경로 매개변수:**
-- `projectId` (long): 프로젝트 ID
+## 프로젝트 응답 데이터 구조
 
-**응답:**
-```json
-{
-  "msg": "팀 역할 분배 완료",
-  "data": "홍길동 - 프론트엔드 개발자\n김철수 - 백엔드 개발자"
+```typescript
+interface ProjectDetailResponse {
+  id: number;
+  title: string;
+  description: string;
+  techStacks: string[];        // 배열로 반환
+  teamSize: number;
+  currentTeamSize: number;     // 현재 팀원 수
+  creator: string;             // 프로젝트 생성자 닉네임
+  status: ProjectStatus;       // "RECRUITING" | "COMPLETED"
+  content: string | null;      // 역할 배분 내용 (null 가능)
+  durationWeeks: number;
+  createdAt: string;           // LocalDateTime이 ISO 문자열로 변환
 }
 ```
 
-## DTO 및 엔티티
+## 사용자 데이터 구조
 
-### 1. 사용자 (User)
+```typescript
+interface User {
+  id: number;
+  username: string;           // 유니크 사용자명
+  password: string;           // 암호화된 비밀번호
+  nickname: string;           // 표시명
+  apiKey: string;            // 리프레시 토큰
+  profileImgUrl: string | null;
+}
+```
 
-#### User 엔티티
-| 필드명 | 타입 | 설명 |
-|------|------|-----|
-| id | Long | 사용자 ID |
-| username | String | 사용자 아이디 (유니크) |
-| password | String | 비밀번호 |
-| nickname | String | 사용자 닉네임 |
-| apiKey | String | API 키 (유니크) |
-| profileImgUrl | String | 프로필 이미지 URL |
+## 지원서 관련 데이터 구조
 
-### 2. 프로젝트 (Project)
+```typescript
+interface ApplicationDetailResponseDto {
+  applicationId: number;      // 지원서 ID
+  nickname: string;          // 지원자 닉네임 (직접 필드)
+  status: ApplicationStatus; // 지원서 상태
+  appliedAt: string;         // 지원 일시 (ISO 문자열)
+}
 
-#### Project 엔티티
-| 필드명 | 타입 | 설명 |
-|------|------|-----|
-| id | Long | 프로젝트 ID |
-| title | String | 프로젝트 제목 |
-| description | String | 프로젝트 설명 |
-| techStack | String | 기술 스택 (쉼표로 구분된 문자열) |
-| teamSize | Integer | 팀 규모 |
-| currentTeamSize | Integer | 현재 팀원 수 |
-| creator | User | 프로젝트 생성자 |
-| status | ProjectStatus | 프로젝트 상태 |
-| content | String | 프로젝트 내용 |
-| durationWeeks | Integer | 프로젝트 기간 (주) |
-| createdAt | LocalDateTime | 생성일시 |
-| applications | List<Application> | 지원서 목록 |
+type ApplicationStatus = "PENDING" | "APPROVED" | "REJECTED";
+```
 
-#### ProjectCreateRequest DTO
-| 필드명 | 타입 | 설명 | 유효성 검사 |
-|------|------|-----|---------|
-| userId | Long | 사용자 ID | @NotNull @Min(1) |
-| title | String | 프로젝트 제목 | @NotNull @Size(min = 1, max = 200) |
-| description | String | 프로젝트 설명 | @NotNull @Size(min = 1, max = 2000) |
-| techStack | String | 기술 스택 | @NotNull @Size(min = 1, max = 500) |
-| teamSize | int | 팀 규모 | @Min(1) |
-| durationWeeks | int | 프로젝트 기간 | @Min(1) |
+## 분석 결과 데이터 구조
 
-#### ProjectDetailResponse DTO
-| 필드명 | 타입 | 설명 |
-|------|------|-----|
-| id | Long | 프로젝트 ID |
-| title | String | 프로젝트 제목 |
-| description | String | 프로젝트 설명 |
-| techStacks | List<String> | 기술 스택 목록 |
-| teamSize | Integer | 팀 규모 |
-| currentTeamSize | Integer | 현재 팀원 수 |
-| creator | String | 프로젝트 생성자 |
-| status | String | 프로젝트 상태 |
-| content | String | 프로젝트 내용 |
-| createdAt | String | 생성일시 |
+```typescript
+interface AnalysisResultResponse {
+  id: number;
+  applicationId: number;
+  compatibilityScore: number;    // BigDecimal → number
+  compatibilityReason: string;
+}
+```
 
-#### ProjectStatus ENUM
-| 값 | 설명 |
-|---|-----|
-| RECRUITING | 모집중 |
-| COMPLETED | 완료 |
+## 중요 사항
 
-### 3. 지원서 (Application)
+### 1. 데이터 타입 변환
+- **LocalDateTime** → **string** (ISO 8601 형식)
+- **BigDecimal** → **number**
+- **enum** → **string literal types**
 
-#### Application 엔티티
-| 필드명 | 타입 | 설명 |
-|------|------|-----|
-| id | Long | 지원서 ID |
-| user | User | 지원자 |
-| project | Project | 지원한 프로젝트 |
-| status | ApplicationStatus | 지원서 상태 |
-| appliedAt | LocalDateTime | 지원 일시 |
-| skillScore | List<SkillScore> | 기술 점수 목록 |
-| analysisResult | AnalysisResult | 분석 결과 |
+### 2. 프로젝트 상태
+- 백엔드에는 `RECRUITING`, `COMPLETED` 두 상태만 존재
+- `IN_PROGRESS`는 프론트엔드에서만 사용하는 상태
 
-#### ApplicationDetailResponseDto DTO
-| 필드명 | 타입 | 설명 |
-|------|------|-----|
-| applicationId | Long | 지원서 ID |
-| user | User | 지원자 정보 |
-| status | ApplicationStatus | 지원서 상태 |
-| appliedAt | LocalDateTime | 지원 일시 |
+### 3. 기술 스택 처리
+- **생성 시**: `techStack` (문자열, 쉼표로 구분)
+- **응답 시**: `techStacks` (문자열 배열)
+- **지원 시**: `techStacks` (문자열 배열)
 
-#### ApplicationStatusUpdateRequestDto DTO
-| 필드명 | 타입 | 설명 | 유효성 검사 |
-|------|------|-----|---------|
-| status | ApplicationStatus | 상태 | @NotNull |
+### 4. API 래퍼 사용 여부
+- **ApiResponse 래퍼 사용**: 대부분의 CRUD 엔드포인트
+- **직접 반환**: `/users/profile`, `/users/projects`, `/users/applications`
 
-#### ApplicationStatus ENUM
-| 값 | 설명 |
-|---|-----|
-| PENDING | 대기중 |
-| APPROVED | 승인 |
-| REJECTED | 거절 |
+### 5. 검증 규칙
+- `title`: 1-200자
+- `description`: 1-2000자
+- `techStack`: 1-500자
+- `content`: 1-2000자
+- `teamSize`, `durationWeeks`: 최소 1
 
-#### ProjectApplyRequest DTO
-| 필드명 | 타입 | 설명 | 유효성 검사 |
-|------|------|-----|---------|
-| userId | Long | 사용자 ID | @NotNull @Min(1) |
-| techStacks | List<String> | 기술 스택 목록 | @NotNull |
-| techScores | List<Integer> | 기술 점수 목록 | @NotNull |
-
-### 4. 기술 점수 (SkillScore)
-
-#### SkillScore 엔티티
-| 필드명 | 타입 | 설명 |
-|------|------|-----|
-| id | Long | 기술 점수 ID |
-| application | Application | 소속 지원서 |
-| techName | String | 기술명 |
-| score | int | 점수 (1-10) |
-
-### 5. 분석 결과 (AnalysisResult)
-
-#### AnalysisResult 엔티티
-| 필드명 | 타입 | 설명 |
-|------|------|-----|
-| id | Long | 분석 결과 ID |
-| application | Application | 소속 지원서 |
-| compatibilityScore | BigDecimal | 적합도 점수 |
-| compatibilityReason | String | 적합도 이유 |
-
-#### AnalysisResultResponse DTO
-| 필드명 | 타입 | 설명 |
-|------|------|-----|
-| id | Long | 분석 결과 ID |
-| applicationId | Long | 지원서 ID |
-| compatibilityScore | BigDecimal | 적합도 점수 |
-| compatibilityReason | String | 적합도 이유 |
-
-## 오류 코드
-
-| 코드 | HTTP 상태 | 메시지 | 설명 |
-|-----|---------|-----|-----|
-| 200-1 | 200 | 성공 | 요청 성공 |
-| 201-1 | 201 | 생성됨 | 리소스 생성 성공 |
-| 400-1 | 400 | 잘못된 요청 | 요청 데이터 형식 오류 |
-| 401-1 | 401 | 인증 필요 | 로그인 필요 |
-| 403-1 | 403 | 권한 없음 | 접근 권한 없음 |
-| 404-1 | 404 | 찾을 수 없음 | 리소스 없음 |
-| 409-1 | 409 | 충돌 | 이미 존재하는 리소스 |
-| 500-1 | 500 | 서버 오류 | 내부 서버 오류 |
+이 문서는 실제 백엔드 코드 분석을 통해 작성되었으며, 프론트엔드에서 실제로 받는 데이터 구조와 정확히 일치합니다.

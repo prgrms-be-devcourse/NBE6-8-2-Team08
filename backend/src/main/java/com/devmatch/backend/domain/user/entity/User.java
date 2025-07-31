@@ -2,6 +2,7 @@ package com.devmatch.backend.domain.user.entity;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
+import lombok.AccessLevel;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,6 +37,7 @@ public class User {
   @Size(min = 1, max = 50, message = "사용자 이름은 1자 이상 50자 이하이어야 합니다.")
   private String username;//기존 name 필드 대신 사용, 유니크한 사용자 이름
   private String password;
+  @Getter(AccessLevel.NONE) // 롬복 자동 생성 제외, 수동 메서드 사용
   private String nickname;//소셜 응답으로 올 정보
   @Column(unique = true)
   private String apiKey;//리프레시 토큰
