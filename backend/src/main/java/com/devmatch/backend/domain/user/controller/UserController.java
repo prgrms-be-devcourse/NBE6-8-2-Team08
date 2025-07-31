@@ -29,6 +29,7 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.OK).body(actor);
   }
 
+
   @GetMapping("/projects")
   public ResponseEntity<List<ProjectDetailResponse>> findProjectsById() {
     User actor = rq.getActor();
