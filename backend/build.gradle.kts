@@ -29,6 +29,7 @@ repositories {
 dependencies {
     implementation(platform("org.springframework.ai:spring-ai-bom:${property("springAiVersion")}"))
 
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-security")

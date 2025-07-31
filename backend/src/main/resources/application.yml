@@ -59,6 +59,14 @@ spring:
         options:
           model: meta-llama/llama-4-maverick-17b-128e-instruct
           temperature: 0
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: when-authorized
 custom:
   jwt:
     secretKey: ${CUSTOM__JWT__SECRET_KEY}
