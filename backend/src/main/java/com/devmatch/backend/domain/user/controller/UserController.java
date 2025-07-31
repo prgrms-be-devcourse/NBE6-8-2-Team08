@@ -23,6 +23,12 @@ public class UserController {
   private final ProjectService projectService;
   private final ApplicationService applicationService;
 
+  @GetMapping("/profile")
+  public ResponseEntity<User> getCurrentUser() {
+    User actor = rq.getActor();
+    return ResponseEntity.status(HttpStatus.OK).body(actor);
+  }
+
   @GetMapping("/projects")
   public ResponseEntity<List<ProjectDetailResponse>> findProjectsById() {
     User actor = rq.getActor();

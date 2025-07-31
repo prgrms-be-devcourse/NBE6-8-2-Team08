@@ -1,10 +1,12 @@
+'use client';
+
 // ============================================
 // 🔐 인증 컨텍스트 (로그인 상태 관리)
 // ============================================
 
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { getCurrentUser } from '@/lib/api/user';
-import { logout } from '@/lib/api/auth';
+import { logout as apiLogout } from '@/lib/api/auth';
+import { userApi } from '@/lib/api';
 import { User } from '@/types';
 
 
@@ -45,12 +47,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // 백엔드에서 현재 사용자 정보 가져오기
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
+        console.log('🔍 Auth Check - API 호출로 인증 상태 확인');
+        
+        // 🚀 백엔드 API 호출로 현재 사용자 정보 가져오기
+        const currentUser = await userApi.getCurrentUser();
+        
+        if (currentUser) {
+          console.log('✅ 인증됨 - 사용자 정보:', currentUser);
+          console.log('🔍 nickName 값:', currentUser.nickName);
+          console.log('🔍 username 값:', currentUser.username);
+          setUser(currentUser);
+        } else {
+          console.log('❌ 인증 안됨 - 사용자 정보 없음');
+          setUser(null);
+        }
       } catch (error) {
-        // 인증 실패 시 로그아웃 상태 유지
-        console.warn('인증 상태 확인 실패:', error);
+        console.log('❌ 인증 안됨 - API 호출 실패:', error);
         setUser(null);
       } finally {
         setLoading(false);
@@ -75,7 +87,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = async () => {
     try {
       // 백엔드 로그아웃 API 호출
-      await logout();
+      await apiLogout();
       // 로컬 상태 업데이트
       setUser(null);
     } catch (error) {

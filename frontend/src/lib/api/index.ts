@@ -49,16 +49,21 @@ apiClient.interceptors.request.use(
  * 📥 응답 인터셉터
  * 
  * 🎯 목적: 응답 후 로깅 및 에러 처리
- * ✅ 성공 응답: 데이터 직접 반환 (response.data.data)
+ * ✅ 성공 응답: 전체 response 객체 반환 (각 API 함수에서 response.data 접근)
  * ❌ 에러 응답: 에러 메시지 추출 및 표시
  */
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
     console.log(`📥 [API Response] ${response.status} ${response.config.url}`, response.data);
-    return response.data; // 🎯 데이터 직접 반환 (response.data.data)
+    return response; // 🎯 전체 response 객체 반환
   },
   (error) => {
-    console.error('❌ [API Response Error]', error.response?.data || error.message);
+    console.error('❌ [API Response Error]', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+      url: error.config?.url
+    });
     return Promise.reject(error);
   }
 );
@@ -71,3 +76,4 @@ export * as projectApi from './project';
 export * as userApi from './user';
 export * as authApi from './auth';
 export * as applicationApi from './application';
+export * as analysisApi from './analysis';
