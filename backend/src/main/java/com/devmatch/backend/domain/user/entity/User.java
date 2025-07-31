@@ -101,4 +101,13 @@ public class User {
     this.nickname = nickname;
     this.profileImgUrl = profileImgUrl;
   }
+
+  //getActor를 통한 유저 객체에는 url이 없으니 getActorFromDb를 통해 DB에서 꺼낸 유저 객체를 사용해서 url을 사용.
+  public String getProfileImgUrlOrDefault() {
+    if (profileImgUrl == null) {
+      return "https://placehold.co/600x600?text=U_U";
+    }
+
+    return profileImgUrl;
+  }
 }
