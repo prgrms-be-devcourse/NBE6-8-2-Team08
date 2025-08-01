@@ -86,7 +86,7 @@ export function ProjectApplyModal({ project, onApply, isApplying, children }: Pr
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={isApplying ? undefined : setOpen}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>

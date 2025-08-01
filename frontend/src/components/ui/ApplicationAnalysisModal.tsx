@@ -125,7 +125,7 @@ export function ApplicationAnalysisModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={loading ? undefined : onClose}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto overflow-x-hidden bg-white border border-gray-300 shadow-xl">
         <DialogHeader className="pb-4 border-b">
           <DialogTitle className="text-xl font-bold">지원서 AI 분석 결과</DialogTitle>
