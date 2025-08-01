@@ -15,7 +15,7 @@ import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 
  * 🔧 설정: 기본 URL, 타임아웃, 쿠키 포함
  */
 export const apiClient: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://nbe-6-8-2-team08.vercel.app/api', // 🌐 Vercel 배포 서버
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devmatch-production-cf16.up.railway.app', // 🌐 Railway 백엔드 서버
   timeout: 10000, // ⏱️ 10초 타임아웃
   withCredentials: true, // 🍪 쿠키 포함 (인증을 위해 필수)
 });
