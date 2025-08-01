@@ -949,16 +949,19 @@ export default function ProjectDetailPage() {
                                   분석결과 보기
                                 </Button>
                               </motion.div>
-                              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                <Button 
-                                  onClick={handleDeleteApplication}
-                                  disabled={isDeleting}
-                                  className="bg-white hover:bg-red-50 text-red-600 border-3 border-red-400 shadow-[4px_4px_0px_0px_rgba(239,68,68,0.5)] hover:shadow-[2px_2px_0px_0px_rgba(239,68,68,0.5)] transition-all duration-200 font-bold"
-                                >
-                                  <XCircle className="mr-2 h-4 w-4" />
-                                  {isDeleting ? '취소 중...' : '지원 취소'}
-                                </Button>
-                              </motion.div>
+                              {/* APPROVED 상태에서는 지원 취소 버튼 숨김 */}
+                              {userApplication?.status === 'PENDING' && (
+                                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                  <Button 
+                                    onClick={handleDeleteApplication}
+                                    disabled={isDeleting}
+                                    className="bg-white hover:bg-red-50 text-red-600 border-3 border-red-400 shadow-[4px_4px_0px_0px_rgba(239,68,68,0.5)] hover:shadow-[2px_2px_0px_0px_rgba(239,68,68,0.5)] transition-all duration-200 font-bold"
+                                  >
+                                    <XCircle className="mr-2 h-4 w-4" />
+                                    {isDeleting ? '취소 중...' : '지원 취소'}
+                                  </Button>
+                                </motion.div>
+                              )}
                             </div>
                           </div>
                         </motion.div>
