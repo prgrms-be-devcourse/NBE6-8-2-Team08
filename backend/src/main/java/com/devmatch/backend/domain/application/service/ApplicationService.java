@@ -54,6 +54,7 @@ public class ApplicationService {
       skillScores.add(score);
     }
 
+    // 멘토링 피드백: 세이브를 명시적으로 표현해주는 게 좋음
     application.getSkillScore().addAll(skillScores);
 
     return new ApplicationDetailResponseDto(applicationRepository.save(application));
@@ -104,6 +105,9 @@ public class ApplicationService {
   public void saveAnalysisResult(Long applicationId, AnalysisResult analysisResult) {
     Application application = getApplicationByApplicationId(applicationId);
 
+    // 멘토링 피드백: 종속 관계에 따라 구현을 어떤식으로 할지 고민.
+    // 두 서비스의 상위 서비스를 만들어서 관장하는 방식으로
+    // 상위 서비스의 이름은 보통 어플리케이션서비스라고 지음
     application.setAnalysisResult(analysisResult);
   }
 
@@ -111,6 +115,8 @@ public class ApplicationService {
   @Transactional
   public void deleteApplication(Long applicationId) {
     Application application = getApplicationByApplicationId(applicationId);
+
+    application.getProject().changeCurTeamSize(application.getStatus(), null);
 
     applicationRepository.delete(application); // DB 에서 삭제
   }
