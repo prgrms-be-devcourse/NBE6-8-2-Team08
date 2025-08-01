@@ -305,9 +305,13 @@ export default function ProjectDetailPage() {
       });
       await applicationApi.deleteApplication(userApplication.applicationId);
       setUserApplication(null);
-      // 지원서 목록 새로고침
+      // 지원서 목록 및 프로젝트 데이터 새로고침 (currentTeamSize 업데이트 포함)
       if (project) {
-        const updatedApplications = await projectApi.getProjectApplications(project.id);
+        const [updatedProject, updatedApplications] = await Promise.all([
+          projectApi.getProject(project.id),
+          projectApi.getProjectApplications(project.id)
+        ]);
+        setProject(updatedProject);
         setApplications(updatedApplications);
       }
       toast.success('지원이 취소되었습니다.', {
@@ -949,19 +953,17 @@ export default function ProjectDetailPage() {
                                   분석결과 보기
                                 </Button>
                               </motion.div>
-                              {/* APPROVED 상태에서는 지원 취소 버튼 숨김 */}
-                              {userApplication?.status === 'PENDING' && (
-                                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                  <Button 
-                                    onClick={handleDeleteApplication}
-                                    disabled={isDeleting}
-                                    className="bg-white hover:bg-red-50 text-red-600 border-3 border-red-400 shadow-[4px_4px_0px_0px_rgba(239,68,68,0.5)] hover:shadow-[2px_2px_0px_0px_rgba(239,68,68,0.5)] transition-all duration-200 font-bold"
-                                  >
-                                    <XCircle className="mr-2 h-4 w-4" />
-                                    {isDeleting ? '취소 중...' : '지원 취소'}
-                                  </Button>
-                                </motion.div>
-                              )}
+                              {/* 승인된 지원자도 지원 취소 가능 */}
+                              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                <Button 
+                                  onClick={handleDeleteApplication}
+                                  disabled={isDeleting}
+                                  className="bg-white hover:bg-red-50 text-red-600 border-3 border-red-400 shadow-[4px_4px_0px_0px_rgba(239,68,68,0.5)] hover:shadow-[2px_2px_0px_0px_rgba(239,68,68,0.5)] transition-all duration-200 font-bold"
+                                >
+                                  <XCircle className="mr-2 h-4 w-4" />
+                                  {isDeleting ? '취소 중...' : '지원 취소'}
+                                </Button>
+                              </motion.div>
                             </div>
                           </div>
                         </motion.div>
