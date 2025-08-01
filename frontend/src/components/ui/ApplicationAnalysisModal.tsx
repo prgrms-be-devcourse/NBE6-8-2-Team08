@@ -34,7 +34,8 @@ export function ApplicationAnalysisModal({
       
       // AI 분석 결과 조회 - 실제 백엔드 API 호출
       try {
-        const response = await fetch(`http://localhost:8080/analysis/application/${applicationId}`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devmatch-production-cf16.up.railway.app';
+        const response = await fetch(`${apiUrl}/analysis/application/${applicationId}`, {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -64,7 +65,7 @@ export function ApplicationAnalysisModal({
         
         // 분석 결과가 없으면 생성 시도
         try {
-          const createResponse = await fetch(`http://localhost:8080/analysis/application/${applicationId}`, {
+          const createResponse = await fetch(`${apiUrl}/analysis/application/${applicationId}`, {
             method: 'POST',
             credentials: 'include',
             headers: {
