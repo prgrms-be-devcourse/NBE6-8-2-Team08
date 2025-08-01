@@ -719,8 +719,8 @@ export default function ProjectDetailPage() {
                   <div>
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex-1"></div>
-                      {/* content 수정 버튼 - COMPLETED 상태이고 content가 있을 때만 표시 */}
-                      {project.status === 'COMPLETED' && project.content && (
+                      {/* content 수정 버튼 - COMPLETED 상태이고 content가 있고 프로젝트 생성자일 때만 표시 */}
+                      {project.status === 'COMPLETED' && project.content && userProjects.some(userProject => userProject.id === project.id) && (
                         <button
                           onClick={() => setIsEditingContent(true)}
                           disabled={isEditingContent}

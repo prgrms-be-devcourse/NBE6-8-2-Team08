@@ -28,13 +28,15 @@ export function ApplicationAnalysisModal({
   const [error, setError] = useState<string | null>(null);
 
   const fetchAnalysisData = useCallback(async () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devmatch-production-cf16.up.railway.app';
+    
     try {
       setLoading(true);
       setError(null);
       
       // AI 분석 결과 조회 - 실제 백엔드 API 호출
       try {
-        const response = await fetch(`http://localhost:8080/analysis/application/${applicationId}`, {
+        const response = await fetch(`${apiUrl}/analysis/application/${applicationId}`, {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -64,7 +66,7 @@ export function ApplicationAnalysisModal({
         
         // 분석 결과가 없으면 생성 시도
         try {
-          const createResponse = await fetch(`http://localhost:8080/analysis/application/${applicationId}`, {
+          const createResponse = await fetch(`${apiUrl}/analysis/application/${applicationId}`, {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -123,7 +125,7 @@ export function ApplicationAnalysisModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={loading ? undefined : onClose}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto overflow-x-hidden bg-white border border-gray-300 shadow-xl">
         <DialogHeader className="pb-4 border-b">
           <DialogTitle className="text-xl font-bold">지원서 AI 분석 결과</DialogTitle>
