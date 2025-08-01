@@ -28,13 +28,14 @@ export function ApplicationAnalysisModal({
   const [error, setError] = useState<string | null>(null);
 
   const fetchAnalysisData = useCallback(async () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devmatch-production-cf16.up.railway.app';
+    
     try {
       setLoading(true);
       setError(null);
       
       // AI 분석 결과 조회 - 실제 백엔드 API 호출
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devmatch-production-cf16.up.railway.app';
         const response = await fetch(`${apiUrl}/analysis/application/${applicationId}`, {
           method: 'GET',
           credentials: 'include',
