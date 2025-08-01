@@ -115,13 +115,8 @@ public class ApplicationService {
   @Transactional
   public void deleteApplication(Long applicationId) {
     Application application = getApplicationByApplicationId(applicationId);
-    ApplicationStatus status = application.getStatus();
 
-    // 트러블 슈팅: 이미 승인 되어서 프로젝트 구성이 끝난 상태인데 지원서의 삭제가 가능함.
-    // -> 우리 프로젝트의 시나리오 상 승인 대기중인 지원서만 삭제할 수 있기 때문에 이외 상태는 예외 처리
-    if (!status.equals(ApplicationStatus.PENDING)) {
-      throw new IllegalArgumentException("승인 대기중인 지원서만 삭제할 수 있습니다. 현재 상태: " + status);
-    }
+    application.getProject().changeCurTeamSize(application.getStatus(), null);
 
     applicationRepository.delete(application); // DB 에서 삭제
   }
