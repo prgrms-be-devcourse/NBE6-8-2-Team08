@@ -73,9 +73,14 @@ export default function CreateProjectPage() {
       return '연속된 특수문자나 공백은 사용할 수 없습니다.';
     }
     
-    // 시작/끝 특수문자 체크
-    if (/^[\-\.\+\s#]|[\-\.\+\s#]$/.test(trimmedTech)) {
-      return '기술 스택은 특수문자나 공백으로 시작하거나 끝날 수 없습니다.';
+    // 시작/끝 특수문자 체크 (단, 문자+#은 허용 예: C#, F#)
+    if (/^[\-\.\+\s]|[\-\.\+\s]$/.test(trimmedTech)) {
+      return '기술 스택은 하이픈(-), 점(.), 플러스(+), 공백으로 시작하거나 끝날 수 없습니다.';
+    }
+    
+    // # 기호는 시작은 불가, 끝은 가능 (C#, F# 허용)
+    if (/^#/.test(trimmedTech)) {
+      return '기술 스택은 #으로 시작할 수 없습니다.';
     }
     
     // 중복 체크
@@ -302,7 +307,7 @@ export default function CreateProjectPage() {
                         value={currentTech}
                         onChange={handleTechChange}
                         onKeyPress={handleTechKeyPress}
-                        placeholder="기술 스택을 입력하고 Enter를 누르세요 (영문만, 예: React, Node.js)"
+                        placeholder="기술 스택을 입력하고 Enter를 누르세요 (예: React, Node.js, C#, .NET)"
                         maxLength={30}
                         className="flex-1 border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] transition-all duration-200 font-medium p-4"
                       />
@@ -358,7 +363,7 @@ export default function CreateProjectPage() {
                         <div className="text-sm text-gray-500 space-y-1">
                           <p className="font-medium">• 영문, 숫자, 공백, 하이픈(-), 점(.), 플러스(+), 샵(#)만 사용 가능</p>
                           <p className="font-medium">• 1-30글자 제한</p>
-                          <p className="font-medium">• 예: React, Node.js, TypeScript, C#, .NET</p>
+                          <p className="font-medium">• 예: React, Node.js, TypeScript, C#, F#, C++, .NET</p>
                         </div>
                       </div>
                     )}
