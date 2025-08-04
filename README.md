@@ -36,23 +36,23 @@
 - **Language**: Java 21
 - **Security**: Spring Security + JWT
 - **AI Integration**: Spring AI + OpenAI
-- **Database**: PostgreSQL (Neon)
+- **Database**: PostgreSQL
 - **ORM**: Spring Data JPA
 - **Authentication**: OAuth2 (Google, Kakao, Naver)
 
 ### **Infrastructure & DevOps**
 - **Frontend Deploy**: Vercel
-- **Backend Deploy**: AWS Lightsail
+- **Backend Deploy**: Railway
 - **Database**: PostgreSQL on Neon
 - **Version Control**: Git + GitHub
-- **CI/CD**: GitHub Actions
+- **CI/CD**: Vercel, Railway의 자체 CI/CD 기능
 
 ## 🏗️ 아키텍처
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Frontend      │    │    Backend      │    │   Database      │
-│   (Vercel)      │────│ (AWS Lightsail) │────│ (Neon PostgreSQL)│
+│   (Vercel)      │────│   (Railway)     │────│(Neon PostgreSQL)│
 │                 │    │                 │    │                 │
 │ • Next.js 15    │    │ • Spring Boot   │    │ • PostgreSQL    │
 │ • TypeScript    │    │ • Spring AI     │    │ • Connection    │
@@ -126,14 +126,17 @@ NBE6-8-2-Team08/
 ## 🌐 배포 정보
 
 - **🎨 Frontend**: [https://nbe-6-8-2-team08-vaug.vercel.app](https://nbe-6-8-2-team08-vaug.vercel.app)
-- **⚙️ Backend API**: 배포 완료 후 업데이트 예정
+- **⚙️ Backend API**: [https://devmatch-production-cf16.up.railway.app](https://devmatch-production-cf16.up.railway.app)
 
 ## 🤝 개발팀
 
 **8팀 - DevMatch 개발팀**
-- 전체 팀원이 Frontend, Backend 개발에 참여
-- 페어 프로그래밍 및 코드 리뷰 활성화
-- Git Flow 기반 협업 및 이슈 관리
+- 김지원: OAuth 2.0 인증 구현, 사용자 전체 API 개발
+- 백상현: 프론트 전체, AI 기반 역할 배분 및 지원서 분석 기능 연동 
+- 석근호: 지원서 전체 API 개발
+- 장동혁: 프로젝트 전체 API 개발
+- 코드 리뷰와 신속한 문제 공유 활성화
+- Github Flow 기반 협업 및 이슈 관리
 
 ---
 
