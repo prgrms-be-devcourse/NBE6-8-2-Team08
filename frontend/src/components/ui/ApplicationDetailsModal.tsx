@@ -119,30 +119,33 @@ export function ApplicationDetailsModal({
                 <CardTitle className="text-lg text-green-700">⭐ 기술별 점수</CardTitle>
               </CardHeader>
               <CardContent>
-                {application.skillScore && application.skillScore.length > 0 ? (
+                {application.techName && application.techName.length > 0 && application.score && application.score.length > 0 ? (
                   <div className="space-y-3">
-                    {application.skillScore.map((skill) => (
-                      <div key={skill.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                        <span className="font-medium text-gray-800">{skill.techName}</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="flex space-x-1">
-                            {[...Array(10)].map((_, index) => (
-                              <div
-                                key={index}
-                                className={`w-3 h-3 rounded-full ${
-                                  index < skill.score 
-                                    ? 'bg-green-500' 
-                                    : 'bg-gray-200'
-                                }`}
-                              />
-                            ))}
+                    {application.techName.map((techName, index) => {
+                      const score = application.score[index] || 0;
+                      return (
+                        <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                          <span className="font-medium text-gray-800">{techName}</span>
+                          <div className="flex items-center space-x-2">
+                            <div className="flex space-x-1">
+                              {[...Array(10)].map((_, dotIndex) => (
+                                <div
+                                  key={dotIndex}
+                                  className={`w-3 h-3 rounded-full ${
+                                    dotIndex < score 
+                                      ? 'bg-green-500' 
+                                      : 'bg-gray-200'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-sm font-semibold text-green-700 ml-2">
+                              {score}/10
+                            </span>
                           </div>
-                          <span className="text-sm font-semibold text-green-700 ml-2">
-                            {skill.score}/10
-                          </span>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-gray-500 text-center py-4">등록된 기술 점수가 없습니다.</p>
