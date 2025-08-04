@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { getApplication } from '@/lib/api/application';
+import { ApplicationDetailResponseDto } from '@/types';
 
 interface ApplicationDetailsModalProps {
   applicationId: number;
@@ -12,55 +14,22 @@ interface ApplicationDetailsModalProps {
   onClose: () => void;
 }
 
-interface ApplicationDetails {  
-  id: number;
-  userId: number;
-  projectId: number;
-  message: string;
-  experience: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  createdAt: string;
-  user: {
-    id: number;
-    username: string;
-    name: string;
-    email: string;
-    introduction?: string;
-    githubUrl?: string;
-    skillTags?: string[];
-  };
-}
-
 export function ApplicationDetailsModal({ 
   applicationId, 
   open, 
   onClose
 }: ApplicationDetailsModalProps) {
-  const [application, setApplication] = useState<ApplicationDetails | null>(null);
+  const [application, setApplication] = useState<ApplicationDetailResponseDto | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchApplicationDetails = useCallback(async () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devmatch-production-cf16.up.railway.app';
-    
     try {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${apiUrl}/api/applications/${applicationId}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const result = await response.json();
-      setApplication(result.data);
+      const result = await getApplication(applicationId);
+      setApplication(result);
       
     } catch (err) {
       console.error('지원서 상세정보 조회 실패:', err);
@@ -131,83 +100,59 @@ export function ApplicationDetailsModal({
                 <CardTitle className="text-lg text-blue-700">👤 지원자 정보</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">이름</p>
-                    <p className="font-medium">{application.user.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">사용자명</p>
-                    <p className="font-medium">{application.user.username}</p>
+                    <p className="text-sm text-gray-600">닉네임</p>
+                    <p className="font-medium">{application.nickname}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">이메일</p>
-                    <p className="font-medium">{application.user.email}</p>
+                    <p className="text-sm text-gray-600">지원서 ID</p>
+                    <p className="font-medium">#{application.applicationId}</p>
                   </div>
-                  {application.user.githubUrl && (
-                    <div>
-                      <p className="text-sm text-gray-600">GitHub</p>
-                      <a 
-                        href={application.user.githubUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="font-medium text-blue-600 hover:text-blue-800 underline"
-                      >
-                        {application.user.githubUrl}
-                      </a>
-                    </div>
-                  )}
-                </div>
-                
-                {application.user.introduction && (
-                  <div className="mt-4">
-                    <p className="text-sm text-gray-600">자기소개</p>
-                    <p className="mt-1 text-gray-800 leading-relaxed">{application.user.introduction}</p>
-                  </div>
-                )}
-
-                {application.user.skillTags && application.user.skillTags.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-sm text-gray-600 mb-2">보유 기술</p>
-                    <div className="flex flex-wrap gap-2">
-                      {application.user.skillTags.map((skill, index) => (
-                        <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* 지원 메시지 */}
-            <Card className="border border-gray-200">
-              <CardHeader>
-                <CardTitle className="text-lg text-green-700">💬 지원 메시지</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-400">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{application.message}</p>
                 </div>
               </CardContent>
             </Card>
 
-            {/* 개발 경험 */}
+            {/* 기술별 점수 */}
             <Card className="border border-gray-200">
               <CardHeader>
-                <CardTitle className="text-lg text-purple-700">🔧 개발 경험</CardTitle>
+                <CardTitle className="text-lg text-green-700">⭐ 기술별 점수</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-400">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{application.experience}</p>
-                </div>
+                {application.skillScore && application.skillScore.length > 0 ? (
+                  <div className="space-y-3">
+                    {application.skillScore.map((skill) => (
+                      <div key={skill.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                        <span className="font-medium text-gray-800">{skill.techName}</span>
+                        <div className="flex items-center space-x-2">
+                          <div className="flex space-x-1">
+                            {[...Array(10)].map((_, index) => (
+                              <div
+                                key={index}
+                                className={`w-3 h-3 rounded-full ${
+                                  index < skill.score 
+                                    ? 'bg-green-500' 
+                                    : 'bg-gray-200'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm font-semibold text-green-700 ml-2">
+                            {skill.score}/10
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">등록된 기술 점수가 없습니다.</p>
+                )}
               </CardContent>
             </Card>
 
             {/* 지원 일시 */}
             <div className="text-sm text-gray-600 text-center border-t pt-4">
-              지원일시: {new Date(application.createdAt).toLocaleString('ko-KR')}
+              지원일시: {new Date(application.appliedAt).toLocaleString('ko-KR')}
             </div>
 
             {/* 닫기 버튼 */}
