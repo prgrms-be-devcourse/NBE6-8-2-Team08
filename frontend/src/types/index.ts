@@ -114,6 +114,8 @@ export interface ApplicationDetailResponseDto {
   nickname: string;          // 지원자 닉네임 (직접 필드)
   status: ApplicationStatus; // 지원서 상태
   appliedAt: string;         // 지원 일시 (ISO 문자열)
+  techName: string[];        // 지원자의 기술명 배열
+  score: number[];           // 지원자의 기술 점수 배열 (1-10)
 }
 
 /**
