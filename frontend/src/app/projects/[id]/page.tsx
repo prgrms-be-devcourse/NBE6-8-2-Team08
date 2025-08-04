@@ -42,6 +42,7 @@ import {
 } from '@/types';
 import { ProjectApplyModal } from '@/components/ui/ProjectApplyModal';
 import { ApplicationAnalysisModal } from '@/components/ui/ApplicationAnalysisModal';
+import { ApplicationDetailsModal } from '@/components/ui/ApplicationDetailsModal';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProjectDetailPage() {
@@ -60,6 +61,8 @@ export default function ProjectDetailPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [pendingApplicationId, setPendingApplicationId] = useState<number | null>(null);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [showApplicationDetailsModal, setShowApplicationDetailsModal] = useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = useState<number | null>(null);
   const [processingApplications, setProcessingApplications] = useState<Set<number>>(new Set());
   
   // 역할배분 내용 수정 관련 상태
@@ -373,6 +376,11 @@ export default function ProjectDetailPage() {
         return next;
       });
     }
+  };
+
+  const handleViewApplicationDetails = (applicationId: number) => {
+    setSelectedApplicationId(applicationId);
+    setShowApplicationDetailsModal(true);
   };
 
   const handleDeleteProject = async () => {
@@ -1023,9 +1031,19 @@ export default function ProjectDetailPage() {
                             <div className="flex items-center gap-2">
                               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                 <Button
+                                  onClick={() => handleViewApplicationDetails(application.applicationId)}
+                                  className="bg-blue-500 hover:bg-blue-600 text-white border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 font-bold px-3 py-1 text-sm"
+                                  title="지원서 보기"
+                                >
+                                  <FileText className="w-4 h-4" />
+                                </Button>
+                              </motion.div>
+                              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                <Button
                                   onClick={() => handleApproveApplication(application.applicationId)}
                                   disabled={processingApplications.has(application.applicationId)}
                                   className="bg-green-500 hover:bg-green-600 text-white border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 font-bold px-3 py-1 text-sm"
+                                  title="승인"
                                 >
                                   <Check className="w-4 h-4" />
                                 </Button>
@@ -1035,6 +1053,7 @@ export default function ProjectDetailPage() {
                                   onClick={() => handleRejectApplication(application.applicationId)}
                                   disabled={processingApplications.has(application.applicationId)}
                                   className="bg-red-500 hover:bg-red-600 text-white border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 font-bold px-3 py-1 text-sm"
+                                  title="거절"
                                 >
                                   <X className="w-4 h-4" />
                                 </Button>
@@ -1078,6 +1097,18 @@ export default function ProjectDetailPage() {
             onConfirm={handleAnalysisConfirm}
             onCancel={handleAnalysisCancel}
             isAlreadyApplied={!!userApplication}
+          />
+        )}
+
+        {/* 지원서 상세 모달 */}
+        {selectedApplicationId && (
+          <ApplicationDetailsModal
+            applicationId={selectedApplicationId}
+            open={showApplicationDetailsModal}
+            onClose={() => {
+              setShowApplicationDetailsModal(false);
+              setSelectedApplicationId(null);
+            }}
           />
         )}
       </div>
