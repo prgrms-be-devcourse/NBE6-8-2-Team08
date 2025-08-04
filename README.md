@@ -36,7 +36,7 @@
 - **Language**: Java 21
 - **Security**: Spring Security + JWT
 - **AI Integration**: Spring AI + OpenAI
-- **Database**: PostgreSQL (Neon)
+- **Database**: PostgreSQL
 - **ORM**: Spring Data JPA
 - **Authentication**: OAuth2 (Google, Kakao, Naver)
 
