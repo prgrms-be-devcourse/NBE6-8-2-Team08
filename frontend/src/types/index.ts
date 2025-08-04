@@ -106,6 +106,16 @@ export interface ProjectContentUpdateRequest {
 export type ApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 /**
+ * 기술별 점수 (백엔드 실제 구조)
+ * 위치: backend/src/main/java/com/devmatch/backend/domain/application/entity/SkillScore.java
+ */
+export interface SkillScore {
+  id: number;           // 기술점수 ID
+  techName: string;     // 기술 명
+  score: number;        // 기술 숙련도 점수 (1-10)
+}
+
+/**
  * 지원서 상세 응답 (백엔드 실제 구조)
  * 위치: backend/src/main/java/com/devmatch/backend/domain/application/dto/response/ApplicationDetailResponseDto.java
  */
@@ -114,6 +124,7 @@ export interface ApplicationDetailResponseDto {
   nickname: string;          // 지원자 닉네임 (직접 필드)
   status: ApplicationStatus; // 지원서 상태
   appliedAt: string;         // 지원 일시 (ISO 문자열)
+  skillScore: SkillScore[];  // 지원자의 기술별 점수
 }
 
 /**
