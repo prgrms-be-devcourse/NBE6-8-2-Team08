@@ -11,10 +11,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Set gradlew executable
+        run: chmod +x backend/gradlew
+        
       - name: Backend Test
         run: |
           cd backend
-          ./gradlew clean build -x test
+          ./gradlew clean build
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.0
