@@ -28,6 +28,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/devmatch/backend
+            git pull origin main
             chmod +x rebuildAndRestart.sh
             ./rebuildAndRestart.sh
             
