@@ -1,4 +1,3 @@
-git pull origin main
 chmod +x gradlew
 ./gradlew clean build -x test --no-daemon
 pkill -f 'backend-0.0.1-SNAPSHOT.jar' || true
