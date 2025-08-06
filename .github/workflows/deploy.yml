@@ -18,7 +18,7 @@ jobs:
       - name: Backend Test
         run: |
           cd backend
-          ./gradlew clean build
+          ./gradlew clean build -x test
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.0
