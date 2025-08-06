@@ -9,16 +9,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-#      - name: Set gradlew executable
-#        run: chmod +x backend/gradlew
+      - name: Set gradlew executable
+        run: chmod +x backend/gradlew
         
-#      - name: Backend Test
-#        run: |
-#          cd backend
-#          ./gradlew clean build -x test
+      - name: Backend Test
+        run: ./backend/gradlew clean build -x test
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.0
