@@ -1,4 +1,4 @@
-xspring:
+spring:
   datasource:
     url: jdbc:h2:mem:db_test;MODE=MySQL
     username: sa
