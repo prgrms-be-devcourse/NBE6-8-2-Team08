@@ -22,7 +22,7 @@ class ProjectRepositoryTest {
 
   @Test
   @DisplayName("성공: 사용자 ID로 프로젝트 목록을 조회하면, 해당 사용자의 프로젝트만 반환한다")
-  void findAllByCreatorId_shouldReturnOnlyProjectsOfGivenUser() {
+  void findAllByCreatorId_shouldReturnOnlyProjectsOfGivenUser_whenUserHasProjects() {
     User user1 = userRepository.save(new User("user1@test.com", "pwd1", "user1", "imgUrl1"));
     User user2 = userRepository.save(new User("user2@test.com", "pwd2", "user2", "imgUrl2"));
 
