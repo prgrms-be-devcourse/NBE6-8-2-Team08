@@ -79,7 +79,7 @@ public class ProjectController {
   @PostMapping("/{id}/applications")
   public ResponseEntity<ApiResponse<ApplicationDetailResponseDto>> apply(
       @PathVariable Long id,
-      @RequestBody ProjectApplyRequest projectApplyRequest
+      @Valid @RequestBody ProjectApplyRequest projectApplyRequest
   ) {
     return ResponseEntity.ok().body(new ApiResponse<>("지원서 작성 성공",
         applicationService.createApplication(id, projectApplyRequest)));
