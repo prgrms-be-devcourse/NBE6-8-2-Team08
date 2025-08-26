@@ -3,35 +3,18 @@
 이 레포지토리는 **프로그래머스 백엔드 데브코스**에서 진행한 **백엔드 6기 8회차 8팀의 2차 프로젝트**를 Fork하여,  
 제가 맡은 **작업 및 기여 내용을 기록**하기 위해 별도로 보관하는 공간입니다.
 
+---
+
 ## 🚀 구현 기능
 
 ### 💻 프로젝트 API
 
-- `POST /projects`  
-  새로운 프로젝트 생성
-
-- `GET /projects`  
-  모든 프로젝트 목록 조회
-
-- `GET /projects/{id}`  
-  특정 프로젝트 ID에 해당하는 상세 정보 조회
-
-- `PATCH /projects/{id}/status`  
-  프로젝트 상태 수정
-
-- `PATCH /projects/{id}/content`  
-  프로젝트 역할 배분 내용 수정
-
-- `DELETE /projects/{id}`  
-  프로젝트 삭제
-
-- `GET /projects/{id}/applications`  
-  특정 프로젝트에 지원한 지원서 전체 목록 조회
-
-- `POST /projects/{id}/applications`  
-  프로젝트 지원서 등록
-
----
+| HTTP 메서드 & 경로                 | 설명                    | HTTP 메서드 & 경로                 | 설명                   |
+|-----------------------------------|-------------------------|------------------------------------|------------------------|
+| `POST /projects`                  | 새로운 프로젝트 생성      | `PATCH /projects/{id}/status`      | 프로젝트 상태 수정      |
+| `GET /projects`                   | 모든 프로젝트 목록 조회   | `PATCH /projects/{id}/content`     | 프로젝트 역할 배분 수정 |
+| `GET /projects/{id}`              | 특정 프로젝트 상세 조회   | `DELETE /projects/{id}`            | 프로젝트 삭제          |
+| `GET /projects/{id}/applications` | 프로젝트 지원서 목록 조회 | `POST /projects/{id}/applications` | 프로젝트 지원서 등록    |
 
 ### 🌟 설계 중 각 계층의 역할
 
