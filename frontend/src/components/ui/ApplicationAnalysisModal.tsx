@@ -28,7 +28,7 @@ export function ApplicationAnalysisModal({
   const [error, setError] = useState<string | null>(null);
 
   const fetchAnalysisData = useCallback(async () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://devmatch-production-cf16.up.railway.app';
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.devmatch.store';
     
     try {
       setLoading(true);
